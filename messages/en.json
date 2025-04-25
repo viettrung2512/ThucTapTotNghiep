@@ -1,0 +1,23 @@
+{
+   "test": {
+      "hello": "hello"
+   },
+   "header": {
+      "explore": "Explore",
+      "pricing": "Pricing",
+      "search": "Search",
+      "resource": "Resource",
+      "forbusiness": "For Business",
+      "register": "Register",
+      "joinMobile": "Join",
+      "login": "Login"
+   },
+   "localeSwitcher": {
+      "vi": "Vietnamese",
+      "en": "English",
+      "label": "Language"
+   },
+   "home-right": {
+      "Contact person": "Contact person"
+   }
+}
