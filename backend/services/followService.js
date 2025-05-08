@@ -73,8 +73,21 @@ module.exports = {
   // Get followers of a user
   async getFollowers(userId) {
     try {
-      const user = await User.findById(userId).populate('followers');
-      return user.followers;
+      const user = await User.findById(userId).populate({
+        path: 'followers',
+        populate: {
+          path: 'follower',
+          model: 'User',
+          select: '_id name username profilePicture',
+        },
+      });
+      if (!user) throw new Error('User not found');
+      return user.followers.map(follow => ({
+        id: follow.follower._id,
+        name: follow.follower.name,
+        username: follow.follower.username,
+        profilePicture: follow.follower.profilePicture,
+      }));
     } catch (err) {
       throw err;
     }
@@ -83,8 +96,21 @@ module.exports = {
   // Get following of a user
   async getFollowing(userId) {
     try {
-      const user = await User.findById(userId).populate('following');
-      return user.following;
+      const user = await User.findById(userId).populate({
+        path: 'following',
+        populate: {
+          path: 'following',
+          model: 'User',
+          select: '_id name username profilePicture',
+        },
+      });
+      if (!user) throw new Error('User not found');
+      return user.following.map(follow => ({
+        id: follow.following._id,
+        name: follow.following.name,
+        username: follow.following.username,
+        profilePicture: follow.following.profilePicture,
+      }));
     } catch (err) {
       throw err;
     }

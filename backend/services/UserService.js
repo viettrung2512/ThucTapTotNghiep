@@ -46,7 +46,7 @@ const findByUsername = async (username) => {
 };
 
 const findByIdR = async (id, currentUserId) => {
-  const user = await User.findById(id).select('-password'); // Loại bỏ password
+  const user = await User.findById(id).select('-password').populate('followers').populate('following'); // Loại bỏ password
   if (!user) {
     throw new Error('User not found');
   }
@@ -58,6 +58,8 @@ const findByIdR = async (id, currentUserId) => {
     : false;
   return {
     ...user.toObject(),
+    followerNumber: user.followers.length,
+    followingNumber: user.following.length,
     amIFollowing,
   };
 };
