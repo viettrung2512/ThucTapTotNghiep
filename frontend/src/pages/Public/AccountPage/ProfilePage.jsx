@@ -75,7 +75,12 @@ const ProfilePage = () => {
 
         if (response.ok) {
           const data = await response.json()
-          setMyPosts(data)
+          // Ensure each post has _id field for BlogItem
+          const postsWithId = data.map(post => ({
+            ...post,
+            _id: post._id || post.id
+          }))
+          setMyPosts(postsWithId)
         } else {
           console.error("Error fetching posts:", await response.json())
         }

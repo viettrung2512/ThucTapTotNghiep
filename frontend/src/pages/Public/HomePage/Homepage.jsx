@@ -23,7 +23,7 @@ const Homepage = () => {
 
     try {
       console.log(`Fetching blogs for page: ${page}, size: ${size}`)
-      const response = await fetch(`http://localhost:8080/api/posts?size=${size}&page=${page}`, {
+      const response = await fetch(`http://localhost:8080/api/posts?size=${size}&page=${page + 1}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -35,9 +35,9 @@ const Homepage = () => {
         const data = await response.json()
         console.log("Fetched data:", data)
         setBlogs(data.content)
-        setCurrentPage(data.number) // Make sure we use the page number returned from the API
+        // Remove setting currentPage from API response to avoid pagination loop
         setTotalPages(data.totalPages)
-        console.log(`Current page set to: ${data.number}, Total pages: ${data.totalPages}`)
+        console.log(`Current page requested: ${page}, Total pages: ${data.totalPages}`)
       } else {
         const errorData = await response.json()
         console.error("Lỗi khi lấy danh sách blog:", errorData.message)
@@ -115,7 +115,6 @@ const Homepage = () => {
           setSearchTerm={setSearchTerm}
           resetPage={() => {
             setCurrentPage(0)
-            fetchBlogs(0, pageSize)
           }}
         />
       </header>
@@ -197,7 +196,7 @@ const Homepage = () => {
                   {mostLikedBlogs.slice(0, 4).map((blog) => (
                     <Link
                       to={`/blog/${blog._id}`}
-                      key={blog.id}
+                      key={blog._id}
                       className="flex bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:scale-[1.02] transition transform duration-300"
                     >
                       {/* Image */}
@@ -281,7 +280,6 @@ const Homepage = () => {
                     const newSize = Number(e.target.value)
                     setPageSize(newSize)
                     setCurrentPage(0) // Reset to first page when changing page size
-                    fetchBlogs(0, newSize)
                   }}
                   className="border border-gray-300 rounded px-2 py-1 text-sm"
                 >
