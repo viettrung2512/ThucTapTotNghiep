@@ -1,17 +1,30 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import SaveButton from "../Button/SaveButton";
 import LikeButton from "../Button/LikeButton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const BlogItem = ({ blog, setBlogs }) => {
+  const navigate = useNavigate();
   // Local state for likes and isLiked
   const [likes, setLikes] = useState(blog.likeCnt || 0);
   const [isLiked, setIsLiked] = useState(blog.liked || false);
   const [isSaved, setIsSaved] = useState(blog.saved || false);
 
+  // Sync isSaved state when blog.saved prop changes
+  useEffect(() => {
+    setIsSaved(blog.saved || false);
+  }, [blog.saved]);
+
+  const handleNavigate = () => {
+    navigate(`/blog/${blog._id}`);
+  };
+
   return (
-    <Link to={`/blog/${blog._id}`} className="block">
+    <div
+      className="block cursor-pointer"
+      onClick={handleNavigate}
+    >
       <div className="relative flex items-center border border-gray-100 bg-white rounded-lg hover:shadow-xl hover:scale-[1.02] transition transform duration-300  h-36 overflow-hidden">
         {/* Image on the left */}
         <div className="flex-shrink-0 w-1/4 h-36">
@@ -74,7 +87,7 @@ const BlogItem = ({ blog, setBlogs }) => {
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
