@@ -101,6 +101,15 @@ const Homepage = () => {
     }
   }, [])
 
+  // Refresh blogs if a new post was created
+  useEffect(() => {
+    const newPostCreated = localStorage.getItem("newPostCreated")
+    if (newPostCreated === "true") {
+      fetchBlogs(currentPage, pageSize)
+      localStorage.removeItem("newPostCreated")
+    }
+  }, [])
+
   useEffect(() => {
     fetchMostLikedBlogs()
   }, [])
@@ -151,26 +160,6 @@ const Homepage = () => {
                 <br />
                 All at <span className="text-yellow-300">CWTS</span>
               </p>
-              <div className="mt-8">
-                <Link
-                  to="/create-blog"
-                  className="px-8 py-3 bg-white text-blue-700 font-bold rounded-full hover:bg-blue-50 transition duration-300 shadow-lg inline-flex items-center"
-                >
-                  Start Writing
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 ml-2"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </Link>
-              </div>
             </div>
           </div>
 
@@ -245,9 +234,6 @@ const Homepage = () => {
                     <div className="p-8 max-w-md">
                       <h3 className="text-3xl font-bold text-white mb-4">Discover the Future of Technology</h3>
                       <p className="text-blue-100 mb-6">Explore the latest trends and innovations in the tech world</p>
-                      <button className="px-6 py-2 bg-white text-blue-700 font-bold rounded-lg hover:bg-blue-50 transition duration-300">
-                        Learn More
-                      </button>
                     </div>
                   </div>
                 </div>

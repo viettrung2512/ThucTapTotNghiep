@@ -35,7 +35,7 @@ function SearchResults() {
 
     const delayDebounceFn = setTimeout(() => {
       fetchData();
-    }, 2000);
+    }, 500);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);

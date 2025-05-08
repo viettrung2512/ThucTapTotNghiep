@@ -512,7 +512,7 @@ const FollowersModal = ({ title, onClose, items, loading }) => {
               {title}
             </h2>
             <button
-              className="text-white hover:text-white/80 transition-colors p-1 rounded-full hover:bg-white/10"
+              className="text-white bg-gradient-to-r from-pink-600 to-pink-500 hover:text-white/80 transition-colors p-1 rounded-full border-white"
               onClick={onClose}
             >
               <X className="h-5 w-5" />

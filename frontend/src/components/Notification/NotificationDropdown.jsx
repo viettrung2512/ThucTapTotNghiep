@@ -47,9 +47,6 @@ const NotificationDropdown = () => {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
   }, []);
 
   const markAsRead = async (id) => {
@@ -69,7 +66,7 @@ const NotificationDropdown = () => {
       if (response.ok) {
         setNotifications((prevNotifications) =>
           prevNotifications.map((notification) =>
-            notification.id === id
+            notification._id === id
               ? { ...notification, read: true }
               : notification
           )
@@ -87,6 +84,13 @@ const NotificationDropdown = () => {
     }
   };
 
+  // Helper function to format date if available
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleString();
+  };
+
   return (
     <div className="notification-container" style={{ position: "relative" }}>
       <button onClick={toggleDropdown} className="notification-bell">
@@ -94,19 +98,21 @@ const NotificationDropdown = () => {
       </button>
       {isOpen && (
         <div ref={dropdownRef} className="notification-dropdown">
-          <h4>Notitfications</h4>
+          <h4>Notifications</h4>
           <ul>
             {notifications.length > 0 ? (
               notifications.map((notification) => (
                 <li
-                  key={notification.id}
+                  key={notification._id}
                   className={`notification-item ${!notification.read ? "unread" : ""}`}
                   onClick={() => markAsRead(notification._id)}
                 >
                   <img src="https://images.spiderum.com/sp-xs-avatar/c3edf44040da11e88c56e97b1d97fbce.png" alt="Icon" className="notification-icon" />
                   <div>
                     <p className="notification-message">{notification.title}</p>
-                    <span className="notification-date">{notification.message}</span>
+                    <span className="notification-date">
+                      {notification.date ? formatDate(notification.date) : notification.message}
+                    </span>
                   </div>
                 </li>
               ))
