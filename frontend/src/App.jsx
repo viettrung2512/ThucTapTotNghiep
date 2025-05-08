@@ -83,9 +83,15 @@ const AdminLayout = () => {
 };
 
 // Role-based Route Protection for Admin Pages
+import PropTypes from "prop-types";
+
 const AdminRoute = ({ children }) => {
   const userRole = getUserRole();
   return userRole === "ADMIN" ? children : <Navigate to="/" />;
+};
+
+AdminRoute.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 const App = () => {

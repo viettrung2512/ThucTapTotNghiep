@@ -77,7 +77,6 @@ const Homepage = () => {
     if (newPage >= 0 && newPage < totalPages) {
       console.log(`Changing to page: ${newPage}`)
       setCurrentPage(newPage)
-      fetchBlogs(newPage, pageSize)
     } else {
       console.log(`Invalid page number: ${newPage}, totalPages: ${totalPages}`)
     }

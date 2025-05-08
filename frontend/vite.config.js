@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    open: true,         // Tự động mở trình duyệt
+    open: true,         // Tự động mở trình duyệt (đã tắt)
     strictPort: true,   // Nếu cổng 5173 bị chiếm thì báo lỗi, không đổi cổng
   },
 })
