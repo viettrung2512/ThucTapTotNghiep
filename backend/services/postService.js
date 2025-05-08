@@ -87,8 +87,10 @@ module.exports = {
 
     for (const follower of followers) {
       console.log(follower._id);
+      const followRecord = await Follow.findById(follower._id);
+      const userId = followRecord.user;
       await NotificationService.createNewPostNotification(
-        (userId = Follow.findById(follower._id).user),
+        userId,
         postId,
         '🆕 Bài viết mới',
         `📢 ${currUsername} vừa đăng một bài viết mới!`
@@ -142,11 +144,16 @@ module.exports = {
     });
 
     await newPost.save();
-    await this.sendNewPostNotificationToUsers(
-      user.followers,
-      newPost._id,
-      user.username
-    );
+    try {
+      await this.sendNewPostNotificationToUsers(
+        user.followers,
+        newPost._id,
+        user.username
+      );
+    } catch (notificationError) {
+      console.error('Error sending new post notifications:', notificationError);
+      // Do not throw to avoid affecting post creation response
+    }
     return newPost;
   },
 

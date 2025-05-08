@@ -12,7 +12,17 @@ const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.user = decoded;
+    console.log("Decoded JWT token payload:", decoded);
+    // Ensure req.user.userId exists for compatibility
+    if (decoded.userId) {
+      req.user = decoded;
+    } else if (decoded.id) {
+      req.user = { userId: decoded.id, ...decoded };
+    } else if (decoded._id) {
+      req.user = { userId: decoded._id, ...decoded };
+    } else {
+      req.user = decoded;
+    }
     next();
   } catch (err) {
     // ⛔ Token hết hạn

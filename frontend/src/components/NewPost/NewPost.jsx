@@ -173,12 +173,22 @@ const NewPost = ({ token }) => {
         body: JSON.stringify(newPost),
       })
 
+      console.log("Post creation response status:", response.status)
+      const responseBody = await response.text()
+      console.log("Post creation response body:", responseBody)
+
       if (response.ok) {
         toast.success("Post created successfully!")
         navigate(`/`)
       } else {
-        const errorData = await response.json()
-        toast.error(`Error: ${errorData.message}`)
+        let errorMessage = responseBody
+        try {
+          const errorData = JSON.parse(responseBody)
+          errorMessage = errorData.message || errorMessage
+        } catch {
+          // responseBody is not JSON
+        }
+        toast.error(`Error: ${errorMessage}`)
       }
     } catch (error) {
       console.error("Error creating post:", error)
@@ -388,7 +398,7 @@ const NewPost = ({ token }) => {
           </button>
           <button
             type="button"
-            className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all flex items-center"
+            className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-white transition-all flex items-center"
             onClick={handlePost}
             disabled={loading}
           >
