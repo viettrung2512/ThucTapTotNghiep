@@ -11,42 +11,42 @@ const BlogItem = ({ blog, setBlogs }) => {
   const [isSaved, setIsSaved] = useState(blog.saved || false);
 
   return (
-    <div className="relative flex items-center border border-gray-100 bg-white rounded-lg hover:shadow-xl hover:scale-[1.02] transition transform duration-300  h-36 overflow-hidden">
-      {/* Image on the left */}
-      <div className="flex-shrink-0 w-1/4 h-36">
-        <img
-          className="w-full h-full object-cover rounded-l-lg"
-          src={blog.imageCloudUrl}
-          alt="Blog cover"
-        />
-      </div>
-
-      {/* Content area */}
-      <div className="flex-1 p-4 flex flex-col justify-between">
-        {/* Save Button at top-right */}
-        <div className="absolute top-2 right-5">
-          <SaveButton
-            blog={blog}
-            setBlogs={setBlogs}
-            isSaved={isSaved}
-            setIsSaved={setIsSaved}
+    <Link to={`/blog/${blog._id}`} className="block">
+      <div className="relative flex items-center border border-gray-100 bg-white rounded-lg hover:shadow-xl hover:scale-[1.02] transition transform duration-300  h-36 overflow-hidden">
+        {/* Image on the left */}
+        <div className="flex-shrink-0 w-1/4 h-36">
+          <img
+            className="w-full h-full object-cover rounded-l-lg"
+            src={blog.imageCloudUrl}
+            alt="Blog cover"
           />
         </div>
 
-        {/* Like Button at bottom-right */}
-        <div className="absolute bottom-2 right-2">
-          <LikeButton
-            blogId={blog._id}
-            likes={likes}
-            isLiked={isLiked}
-            setLikes={setLikes}
-            setIsLiked={setIsLiked}
-            setBlogs={setBlogs}
-          />
-        </div>
+        {/* Content area */}
+        <div className="flex-1 p-4 flex flex-col justify-between">
+          {/* Save Button at top-right */}
+          <div className="absolute top-2 right-5">
+            <SaveButton
+              blog={blog}
+              setBlogs={setBlogs}
+              isSaved={isSaved}
+              setIsSaved={setIsSaved}
+            />
+          </div>
 
-        {/* Blog content */}
-        <Link to={`/blog/${blog._id}`} className="flex-1">
+          {/* Like Button at bottom-right */}
+          <div className="absolute bottom-2 right-2">
+            <LikeButton
+              blogId={blog._id}
+              likes={likes}
+              isLiked={isLiked}
+              setLikes={setLikes}
+              setIsLiked={setIsLiked}
+              setBlogs={setBlogs}
+            />
+          </div>
+
+          {/* Blog content */}
           {/* Category nằm trên cùng */}
           <span className="text-xl font-medium text-gray-500 block mb-2">
             {blog.category}
@@ -72,15 +72,16 @@ const BlogItem = ({ blog, setBlogs }) => {
               {new Date(blog.createdAt).toLocaleDateString("en-GB")}
             </span>
           </div>
-        </Link>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
 BlogItem.propTypes = {
   blog: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    _id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     title: PropTypes.string.isRequired,
     content: PropTypes.string,
     createdAt: PropTypes.string,

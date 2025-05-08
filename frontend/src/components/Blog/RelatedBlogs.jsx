@@ -14,25 +14,31 @@ const RelatedBlogs = ({ tag, postId }) => {
           {
             method: "GET",
             headers: {
+              "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch blog data");
+
+        if (response.ok) {
+          const data = await response.json();
+          const postsWithId = data.content.map(post => ({
+            ...post,
+            _id: post._id || post.id
+          }));
+          setBlogs(postsWithId);
+        } else {
+          console.error("Error fetching related posts:", await response.json());
         }
-        const data = await response.json();
-        setBlogs(data.content);
       } catch (error) {
-        console.error(error);
+        console.error("API connection error:", error);
       }
     };
     fetchBlogData();
-  }, []);
+  }, [tag, postId]);
 
   return (
     <div className="related-blogs text-lg">
-      <h2 className="font-bold mt-5 mb-4">Other related Blogs</h2>
       <div className="blogs-container flex flex-wrap gap-4">
         {blogs?.map((blog) => (
           <BlogCard

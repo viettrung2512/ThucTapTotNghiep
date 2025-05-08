@@ -11,20 +11,16 @@ import {
   ArrowLeft,
   Calendar,
   Clock,
-  Share2,
-  Bookmark,
   MessageCircle,
   Heart,
   Tag,
   User,
-  ExternalLink,
 } from "lucide-react"
 
 const BlogContent = () => {
   const { id } = useParams() // Get blog id from URL
   const [blog, setBlog] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [isBookmarked, setIsBookmarked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
   const navigate = useNavigate()
 
@@ -45,14 +41,15 @@ const BlogContent = () => {
           navigate("/*")
           throw new Error("Failed to fetch blog data")
         }
-        const blogData = await response.json()
+        let blogData = await response.json()
+        // Normalize blogData fields
+        blogData = {
+          ...blogData,
+          likeCount: blogData.likeCount || blogData.likeCnt || (blogData.likes ? blogData.likes.length : 0),
+          _id: blogData._id || blogData.id,
+        }
         setBlog(blogData)
         setLikeCount(blogData.likeCount || 0)
-
-        // Check if post is bookmarked (this would need a real API endpoint)
-        // For now, we'll just use localStorage as an example
-        const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]")
-        setIsBookmarked(bookmarks.includes(id))
       } catch (error) {
         console.error(error)
       } finally {
@@ -63,34 +60,7 @@ const BlogContent = () => {
     fetchBlogData()
   }, [id, navigate])
 
-  const handleBookmark = () => {
-    // In a real app, this would call an API to save the bookmark
-    // For now, we'll just use localStorage as an example
-    const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]")
-    if (isBookmarked) {
-      const updatedBookmarks = bookmarks.filter((bookmarkId) => bookmarkId !== id)
-      localStorage.setItem("bookmarks", JSON.stringify(updatedBookmarks))
-    } else {
-      bookmarks.push(id)
-      localStorage.setItem("bookmarks", JSON.stringify(bookmarks))
-    }
-    setIsBookmarked(!isBookmarked)
-  }
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: blog?.title,
-        text: `Check out this blog: ${blog?.title}`,
-        url: window.location.href,
-      })
-    } else {
-      // Fallback for browsers that don't support the Web Share API
-      navigator.clipboard.writeText(window.location.href)
-      alert("Link copied to clipboard!")
-    }
-  }
-
+ 
   const formatDate = (dateString) => {
     if (!dateString) return ""
     const date = new Date(dateString)
@@ -157,27 +127,7 @@ const BlogContent = () => {
               </span>
             </div>
 
-            {/* Action buttons */}
-            <div className="absolute top-4 right-4 flex space-x-2">
-              <button
-                onClick={handleBookmark}
-                className={`p-2 rounded-full ${
-                  isBookmarked ? "bg-yellow-500 text-white" : "bg-white/80 text-gray-700"
-                } hover:bg-yellow-500 hover:text-white transition-colors backdrop-blur-sm`}
-                aria-label={isBookmarked ? "Remove bookmark" : "Bookmark this article"}
-              >
-                <Bookmark className="h-5 w-5" />
-              </button>
-              <button
-                onClick={handleShare}
-                className="p-2 rounded-full bg-white/80 text-gray-700 hover:bg-blue-600 hover:text-white transition-colors backdrop-blur-sm"
-                aria-label="Share this article"
-              >
-                <Share2 className="h-5 w-5" />
-              </button>
-            </div>
           </div>
-
           {/* Blog title and meta */}
           <div className="px-6 py-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{blog.title}</h1>
@@ -249,26 +199,6 @@ const BlogContent = () => {
                   <BlogAudio blogText={blog.content} />
                   <ReportButton reportText={blog.content} id={blog._id} type={"Post"} message={"Report Post"} />
                 </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={handleShare}
-                    className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share
-                  </button>
-                  <button
-                    onClick={handleBookmark}
-                    className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-                      isBookmarked
-                        ? "bg-yellow-500 text-white hover:bg-yellow-600"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    <Bookmark className="h-4 w-4 mr-2" />
-                    {isBookmarked ? "Saved" : "Save"}
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -310,18 +240,6 @@ const BlogContent = () => {
                 </div>
               </div>
             </div>
-
-            {/* More from this author */}
-            <div className="mt-6 bg-white rounded-xl shadow-md p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">More from this author</h3>
-              <a
-                href={`/profile/${blog.author._id}`}
-                className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                <ExternalLink className="h-4 w-4 mr-1" />
-                View all posts
-              </a>
-            </div>
           </div>
 
           {/* Related blogs and comments */}
@@ -333,13 +251,12 @@ const BlogContent = () => {
               </h2>
               <CommentButton blogId={id} />
             </div>
-
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Related Articles</h2>
-              <RelatedBlogs tag={blog.tags[0]} postId={blog._id} />
-            </div>
           </div>
         </div>
+        <div className="bg-white rounded-xl shadow-md p-3 gap-8">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Related Articles</h2>
+              <RelatedBlogs tag={blog.tags[0]} postId={blog._id} />
+          </div>
       </div>
     </div>
   )
