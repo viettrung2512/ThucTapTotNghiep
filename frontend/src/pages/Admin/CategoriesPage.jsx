@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {  faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
-
+import Sidebar from "./Sidebar";
 const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -54,7 +54,9 @@ const CategoriesPage = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="flex">
+      <Sidebar />
+      <main className="p-6 ml-20 w-full">
       <h2 className="text-2xl font-bold mb-4">Categories</h2>
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-4 border p-4 rounded">
@@ -114,6 +116,7 @@ const CategoriesPage = () => {
           ))}
         </tbody>
       </table>
+      </main>
     </div>
   );
 };

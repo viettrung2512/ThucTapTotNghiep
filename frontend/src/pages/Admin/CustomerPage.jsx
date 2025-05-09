@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
-
+import Sidebar from "./Sidebar";
 const CustomerPage = () => {
   const [customers, setCustomers] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -130,7 +130,9 @@ const CustomerPage = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="flex">
+      <Sidebar />
+      <main className="p-6 ml-20 w-full">
       <h2 className="text-2xl font-bold mb-4">Customers</h2>
 
       {showForm && (
@@ -222,6 +224,7 @@ const CustomerPage = () => {
           ))}
         </tbody>
       </table>
+      </main>
     </div>
   );
 };

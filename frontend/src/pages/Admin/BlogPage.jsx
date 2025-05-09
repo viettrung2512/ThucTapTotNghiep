@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Sidebar from "./Sidebar";
 
 const BlogPage = () => {
   const [blogs, setBlogs] = useState([]);
@@ -47,11 +48,15 @@ const BlogPage = () => {
       },
     })
       .then((response) => {
+        console.log("Delete response:", response); // Log the response
         if (response.ok) {
           toast.success("Blog deleted successfully!");
           setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== id));
         } else {
-          throw new Error("Unable to delete the blog.");
+          return response.json().then((data) => {
+            console.error("Error details:", data); // Log error details
+            throw new Error(data.message || "Unable to delete the blog.");
+          });
         }
       })
       .catch((error) => {
@@ -121,10 +126,11 @@ const BlogPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <ToastContainer />
+    <div className="flex">
+    <Sidebar />
+    <main className="p-6 ml-20 w-full">
+      
       <h2 className="text-2xl font-bold mb-4">Blogs</h2>
-
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-4 border p-4 rounded">
           <h3 className="text-xl font-semibold mb-2">{isEditing ? "Edit Blog" : "Add Blog"}</h3>
@@ -218,6 +224,7 @@ const BlogPage = () => {
           ))}
         </tbody>
       </table>
+      </main>
     </div>
   );
 };
