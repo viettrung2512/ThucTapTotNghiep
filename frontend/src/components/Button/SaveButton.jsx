@@ -31,7 +31,7 @@ const SaveButton = ({ blog, setBlogs, isSaved, setIsSaved }) => {
         // Ensure the blog's saved status is updated correctly in the list
         setBlogs((prevBlogs) =>
           prevBlogs.map((b) =>
-            b.id === blog._id ? { ...b, isSaved: updatedSaved } : b
+            b._id === blog._id ? { ...b, isSaved: updatedSaved } : b
           )
         );
       } else {
@@ -56,7 +56,7 @@ const SaveButton = ({ blog, setBlogs, isSaved, setIsSaved }) => {
 
 SaveButton.propTypes = {
   blog: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    _id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     isSaved: PropTypes.bool,
   }).isRequired,
   isSaved: PropTypes.bool.isRequired,

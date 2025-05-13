@@ -72,14 +72,23 @@ const BlogItem = ({ blog, setBlogs }) => {
 
           {/* Author and createdAt */}
           <div className="flex items-center space-x-3 pt-2">
-            <img
-              className="w-6 h-6 rounded-full object-cover"
-              src={blog.author.profilePicture}
-              alt="Author"
-            />
-            <h1 className="text-xs font-medium text-black">
-              {blog.author.name}
-            </h1>
+            {blog.author ? (
+              <>
+                <img
+                  className="w-6 h-6 rounded-full object-cover"
+                  src={blog.author.profilePicture}
+                  alt="Author"
+                />
+                <h1 className="text-xs font-medium text-black">
+                  {blog.author.name}
+                </h1>
+              </>
+            ) : (
+              <>
+                <div className="w-6 h-6 rounded-full bg-gray-300 inline-block"></div>
+                <h1 className="text-xs font-medium text-black">Unknown</h1>
+              </>
+            )}
             {/* Thêm ngày tạo blog */}
             <span className="text-xs text-gray-500">
               {new Date(blog.createdAt).toLocaleDateString("en-GB")}
@@ -93,7 +102,6 @@ const BlogItem = ({ blog, setBlogs }) => {
 
 BlogItem.propTypes = {
   blog: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     _id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     title: PropTypes.string.isRequired,
     content: PropTypes.string,

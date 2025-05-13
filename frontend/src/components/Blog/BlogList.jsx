@@ -58,7 +58,7 @@ const BlogList = ({ blogs, setBlogs, layout }) => {
 BlogList.propTypes = {
   blogs: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      _id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
       title: PropTypes.string.isRequired,
       content: PropTypes.string,
       imageCloudUrl: PropTypes.string,
