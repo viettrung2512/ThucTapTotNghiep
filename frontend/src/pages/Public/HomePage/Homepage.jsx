@@ -6,6 +6,7 @@ import SideBar from "../../../components/Sidebar/SideBar"
 import BlogList from "../../../components/Blog/BlogList"
 import TopAuthors from "../../../components/Author/TopAuthors"
 import { Link } from "react-router-dom"
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 
 const Homepage = () => {
   const [blogs, setBlogs] = useState([])
@@ -16,10 +17,12 @@ const Homepage = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
   const [pageSize, setPageSize] = useState(6)
+  const [paginationLoading, setPaginationLoading] = useState(false)
 
   const fetchBlogs = async (page = 0, size = 6) => {
     const token = localStorage.getItem("token")
     setLoading(true)
+    setPaginationLoading(true)
 
     try {
       console.log(`Fetching blogs for page: ${page}, size: ${size}`)
@@ -46,6 +49,7 @@ const Homepage = () => {
       console.error("Lỗi kết nối API:", error)
     } finally {
       setLoading(false)
+      setPaginationLoading(false)
     }
   }
 
@@ -77,6 +81,11 @@ const Homepage = () => {
     if (newPage >= 0 && newPage < totalPages) {
       console.log(`Changing to page: ${newPage}`)
       setCurrentPage(newPage)
+      // Scroll to the All Blogs section when changing pages
+      const allBlogsSection = document.getElementById("all-blogs-section")
+      if (allBlogsSection) {
+        allBlogsSection.scrollIntoView({ behavior: "smooth", block: "start" })
+      }
     } else {
       console.log(`Invalid page number: ${newPage}, totalPages: ${totalPages}`)
     }
@@ -115,6 +124,38 @@ const Homepage = () => {
   }, [])
 
   const filteredBlogs = blogs.filter((blog) => blog.title.toLowerCase().includes(searchTerm.toLowerCase()))
+
+  // Calculate visible page range
+  const getVisiblePageRange = () => {
+    const delta = 1 // Number of pages to show on each side of current page
+    const range = []
+    const rangeWithDots = []
+    let l
+
+    for (let i = 0; i < totalPages; i++) {
+      if (
+        i === 0 || // First page
+        i === totalPages - 1 || // Last page
+        (i >= currentPage - delta && i <= currentPage + delta) // Pages around current
+      ) {
+        range.push(i)
+      }
+    }
+
+    for (const i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1)
+        } else if (i - l !== 1) {
+          rangeWithDots.push("...")
+        }
+      }
+      rangeWithDots.push(i)
+      l = i
+    }
+
+    return rangeWithDots
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen text-gray-900">
@@ -164,7 +205,7 @@ const Homepage = () => {
           </div>
 
           {/* Loading State */}
-          {loading ? (
+          {loading && !paginationLoading ? (
             <div className="flex justify-center items-center my-16">
               <div className="relative">
                 <div className="w-12 h-12 rounded-full absolute border-4 border-gray-200"></div>
@@ -249,135 +290,190 @@ const Homepage = () => {
               </section>
 
               {/* All Blogs Section */}
-              <section className="mb-12">
+              <section id="all-blogs-section" className="mb-12">
                 <div className="flex items-center mb-6">
                   <h2 className="text-3xl font-bold text-gray-900">ALL BLOGS</h2>
                   <div className="ml-4 h-1 bg-blue-600 flex-grow rounded-full"></div>
                 </div>
-                <BlogList blogs={filteredBlogs} setBlogs={setBlogs} layout="grid" />
+
+                {/* Pagination info */}
+                <div className="flex justify-between items-center mb-6">
+                  <div className="text-sm text-gray-600">
+                    Showing <span className="font-medium">{filteredBlogs.length}</span> results
+                    {totalPages > 0 && (
+                      <>
+                        {" "}
+                        - Page <span className="font-medium">{currentPage + 1}</span> of{" "}
+                        <span className="font-medium">{totalPages}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Page Size Selector */}
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 mr-2">Items per page:</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => {
+                        const newSize = Number(e.target.value)
+                        setPageSize(newSize)
+                        setCurrentPage(0) // Reset to first page when changing page size
+                      }}
+                      className="border border-gray-300 rounded px-2 py-1 text-sm bg-white"
+                    >
+                      <option value={6}>6</option>
+                      <option value={12}>12</option>
+                      <option value={24}>24</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Blog list with loading overlay */}
+                <div className="relative">
+                  {paginationLoading && (
+                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10 rounded-lg">
+                      <div className="flex items-center">
+                        <div className="relative">
+                          <div className="w-8 h-8 rounded-full absolute border-4 border-gray-200"></div>
+                          <div className="w-8 h-8 rounded-full animate-spin absolute border-4 border-blue-600 border-t-transparent"></div>
+                        </div>
+                        <p className="ml-3 text-gray-600 font-medium">Loading page {currentPage + 1}...</p>
+                      </div>
+                    </div>
+                  )}
+                  <BlogList blogs={filteredBlogs} setBlogs={setBlogs} layout="grid" />
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-10 mb-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-center">
+                      <div className="text-sm text-gray-500 mb-4 sm:mb-0">
+                        Showing page {currentPage + 1} of {totalPages}
+                      </div>
+
+                      <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
+                        {/* First page button */}
+                        <button
+                          onClick={() => handlePageChange(0)}
+                          disabled={currentPage === 0}
+                          className={`relative inline-flex items-center px-2 py-2 rounded-l-md border ${
+                            currentPage === 0
+                              ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                          }`}
+                          aria-label="Go to first page"
+                        >
+                          <ChevronsLeft className="h-5 w-5" />
+                        </button>
+
+                        {/* Previous button */}
+                        <button
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 0}
+                          className={`relative inline-flex items-center px-2 py-2 border ${
+                            currentPage === 0
+                              ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                          }`}
+                          aria-label="Previous page"
+                        >
+                          <ChevronLeft className="h-5 w-5" />
+                        </button>
+
+                        {/* Page numbers */}
+                        {getVisiblePageRange().map((page, index) => {
+                          if (page === "...") {
+                            return (
+                              <span
+                                key={`ellipsis-${index}`}
+                                className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-gray-700"
+                              >
+                                ...
+                              </span>
+                            )
+                          }
+
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => handlePageChange(page)}
+                              className={`relative inline-flex items-center px-4 py-2 border ${
+                                page === currentPage
+                                  ? "z-10 bg-blue-600 border-blue-600 text-white"
+                                  : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                              }`}
+                              aria-current={page === currentPage ? "page" : undefined}
+                            >
+                              {page + 1}
+                            </button>
+                          )
+                        })}
+
+                        {/* Next button */}
+                        <button
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage >= totalPages - 1}
+                          className={`relative inline-flex items-center px-2 py-2 border ${
+                            currentPage >= totalPages - 1
+                              ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                          }`}
+                          aria-label="Next page"
+                        >
+                          <ChevronRight className="h-5 w-5" />
+                        </button>
+
+                        {/* Last page button */}
+                        <button
+                          onClick={() => handlePageChange(totalPages - 1)}
+                          disabled={currentPage >= totalPages - 1}
+                          className={`relative inline-flex items-center px-2 py-2 rounded-r-md border ${
+                            currentPage >= totalPages - 1
+                              ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                          }`}
+                          aria-label="Go to last page"
+                        >
+                          <ChevronsRight className="h-5 w-5" />
+                        </button>
+                      </nav>
+                    </div>
+
+                    {/* Jump to page (on larger screens) */}
+                    <div className="hidden sm:flex justify-center mt-4">
+                      <div className="flex items-center">
+                        <span className="text-sm text-gray-600 mr-2">Jump to page:</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max={totalPages}
+                          value={currentPage + 1}
+                          onChange={(e) => {
+                            const page = Number.parseInt(e.target.value, 10) - 1
+                            if (!isNaN(page) && page >= 0 && page < totalPages) {
+                              handlePageChange(page)
+                            }
+                          }}
+                          className="border border-gray-300 rounded w-16 px-2 py-1 text-sm"
+                        />
+                        <button
+                          onClick={() => {
+                            const input = document.querySelector('input[type="number"]')
+                            const page = Number.parseInt(input.value, 10) - 1
+                            if (!isNaN(page) && page >= 0 && page < totalPages) {
+                              handlePageChange(page)
+                            }
+                          }}
+                          className="ml-2 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                        >
+                          Go
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </section>
-
-              {/* Page Size Selector */}
-              <div className="flex justify-center mb-4 items-center">
-                <span className="text-sm text-gray-600 mr-2">Items per page:</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    const newSize = Number(e.target.value)
-                    setPageSize(newSize)
-                    setCurrentPage(0) // Reset to first page when changing page size
-                  }}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm"
-                >
-                  <option value={6}>6</option>
-                  <option value={12}>12</option>
-                  <option value={24}>24</option>
-                </select>
-              </div>
-
-              {/* Pagination */}
-              <div className="flex justify-center mt-10 mb-6">
-                <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 0}
-                    className={`relative inline-flex items-center px-4 py-2 rounded-l-md border ${
-                      currentPage === 0
-                        ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    <span className="sr-only">Previous</span>
-                    <svg
-                      className="h-5 w-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-
-                  {/* Show page numbers with ellipsis for many pages */}
-                  {Array.from({ length: totalPages }, (_, i) => {
-                    // Always show first page, last page, current page, and pages around current
-                    const showPageNumber =
-                      i === 0 || // First page
-                      i === totalPages - 1 || // Last page
-                      (i >= currentPage - 1 && i <= currentPage + 1) // Current page and adjacent pages
-
-                    // Show ellipsis instead of too many page numbers
-                    if (!showPageNumber) {
-                      if (i === 1 && currentPage > 2) {
-                        return (
-                          <span
-                            key={`ellipsis-start`}
-                            className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-gray-700"
-                          >
-                            ...
-                          </span>
-                        )
-                      }
-                      if (i === totalPages - 2 && currentPage < totalPages - 3) {
-                        return (
-                          <span
-                            key={`ellipsis-end`}
-                            className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-gray-700"
-                          >
-                            ...
-                          </span>
-                        )
-                      }
-                      return null
-                    }
-
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => handlePageChange(i)}
-                        className={`relative inline-flex items-center px-4 py-2 border ${
-                          i === currentPage
-                            ? "z-10 bg-blue-600 border-blue-600 text-white"
-                            : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                        }`}
-                        aria-current={i === currentPage ? "page" : undefined}
-                      >
-                        {i + 1}
-                      </button>
-                    )
-                  }).filter(Boolean)}
-
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage >= totalPages - 1}
-                    className={`relative inline-flex items-center px-4 py-2 rounded-r-md border ${
-                      currentPage >= totalPages - 1
-                        ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    <span className="sr-only">Next</span>
-                    <svg
-                      className="h-5 w-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </nav>
-              </div>
             </>
           )}
         </div>
