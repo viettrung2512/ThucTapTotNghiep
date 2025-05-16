@@ -80,14 +80,16 @@ module.exports = {
           model: 'User',
           select: '_id name username profilePicture',
         },
-      });
+      }).lean();
       if (!user) throw new Error('User not found');
-      return user.followers.map(follow => ({
-        id: follow.follower._id,
-        name: follow.follower.name,
-        username: follow.follower.username,
-        profilePicture: follow.follower.profilePicture,
-      }));
+      return user.followers
+        .filter(follow => follow.follower !== null)
+        .map(follow => ({
+          id: follow.follower._id,
+          name: follow.follower.name,
+          username: follow.follower.username,
+          profilePicture: follow.follower.profilePicture,
+        }));
     } catch (err) {
       throw err;
     }

@@ -88,7 +88,7 @@ module.exports = {
     for (const follower of followers) {
       console.log(follower._id);
       const followRecord = await Follow.findById(follower._id);
-      const userId = followRecord.user;
+      const userId = followRecord.follower; // Fix here: get follower userId
       await NotificationService.createNewPostNotification(
         userId,
         postId,
@@ -126,7 +126,8 @@ module.exports = {
 
   async createPost(postRequest, req) {
     const userId = req.user.userId;
-    const user = await User.findById(userId);
+    // Populate followers before sending notifications
+    const user = await User.findById(userId).populate('followers');
     const { title, category, content, imageCloudUrl, tags = [] } = postRequest;
 
     const newPost = new Post({
