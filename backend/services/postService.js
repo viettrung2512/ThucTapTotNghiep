@@ -98,17 +98,17 @@ module.exports = {
     }
   },
 
-  async getAllPosts(page = 0, size = 10, sort = 'createdAt,desc') {
+async getAllPosts(page, size, sort = 'createdAt,desc') {
     const [sortField, sortDir] = sort.split(',');
     const sortOption = { [sortField]: sortDir === 'desc' ? -1 : 1 };
 
-    const posts = await Post.find()
-      .skip(page * size)
-      .limit(size)
-      .sort(sortOption)
-      .populate('author', 'name profilePicture') // Optional: include author info
-      .lean();
+    let query = Post.find().sort(sortOption).populate('author', 'name profilePicture').lean();
 
+    if (page !== undefined && size !== undefined) {
+      query = query.skip(parseInt(page) * parseInt(size)).limit(parseInt(size));
+    }
+
+    const posts = await query.exec();
     return posts;
   },
 

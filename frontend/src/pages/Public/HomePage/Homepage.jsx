@@ -1,32 +1,26 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import NavBar from "../../../components/Header/NavBar"
 import SideBar from "../../../components/Sidebar/SideBar"
 import BlogList from "../../../components/Blog/BlogList"
 import TopAuthors from "../../../components/Author/TopAuthors"
 import { Link } from "react-router-dom"
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 
 const Homepage = () => {
-  const [blogs, setBlogs] = useState([])
+  const [blogs, setBlogs] = useState([]) // Stores all blogs from API
   const [mostLikedBlogs, setMostLikedBlogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [showMessage, setShowMessage] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [currentPage, setCurrentPage] = useState(0)
-  const [totalPages, setTotalPages] = useState(1)
-  const [pageSize, setPageSize] = useState(6)
-  const [paginationLoading, setPaginationLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1) // 1-based current page
+  const [blogsPerPage, setBlogsPerPage] = useState(6) // Renamed from pageSize
 
-  const fetchBlogs = async (page = 0, size = 6) => {
+  // Fetch all blogs (no pagination parameters)
+  const fetchBlogs = async () => {
     const token = localStorage.getItem("token")
     setLoading(true)
-    setPaginationLoading(true)
 
     try {
-      console.log(`Fetching blogs for page: ${page}, size: ${size}`)
-      const response = await fetch(`http://localhost:8080/api/posts?size=${size}&page=${page + 1}`, {
+      const response = await fetch(`http://localhost:8080/api/posts`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -36,20 +30,18 @@ const Homepage = () => {
 
       if (response.ok) {
         const data = await response.json()
-        console.log("Fetched data:", data)
-        setBlogs(data.content)
-        // Remove setting currentPage from API response to avoid pagination loop
-        setTotalPages(data.totalPages)
-        console.log(`Current page requested: ${page}, Total pages: ${data.totalPages}`)
+        // Assuming data is an array of blogs, if it's an object like { content: [] }, adjust accordingly
+        setBlogs(Array.isArray(data) ? data : data.content || [])
       } else {
         const errorData = await response.json()
         console.error("Lỗi khi lấy danh sách blog:", errorData.message)
+        setBlogs([])
       }
     } catch (error) {
       console.error("Lỗi kết nối API:", error)
+      setBlogs([])
     } finally {
       setLoading(false)
-      setPaginationLoading(false)
     }
   }
 
@@ -66,7 +58,7 @@ const Homepage = () => {
 
       if (mostLikedResponse.ok) {
         const mostLikedData = await mostLikedResponse.json()
-        setMostLikedBlogs(mostLikedData.content)
+        setMostLikedBlogs(mostLikedData.content || [])
       } else {
         const errorData = await mostLikedResponse.json()
         console.error("Lỗi khi lấy bài blog được thích nhiều nhất:", errorData.message)
@@ -76,85 +68,61 @@ const Homepage = () => {
     }
   }
 
-  const handlePageChange = (newPage) => {
-    console.log(`Attempting to change to page: ${newPage}`)
-    if (newPage >= 0 && newPage < totalPages) {
-      console.log(`Changing to page: ${newPage}`)
-      setCurrentPage(newPage)
-      // Scroll to the All Blogs section when changing pages
-      const allBlogsSection = document.getElementById("all-blogs-section")
-      if (allBlogsSection) {
-        allBlogsSection.scrollIntoView({ behavior: "smooth", block: "start" })
-      }
-    } else {
-      console.log(`Invalid page number: ${newPage}, totalPages: ${totalPages}`)
-    }
-  }
-
   useEffect(() => {
-    fetchBlogs(currentPage, pageSize)
-  }, [currentPage, pageSize])
+    fetchBlogs()
+    fetchMostLikedBlogs()
+  }, [])
 
   useEffect(() => {
     const loginSuccess = localStorage.getItem("loginSuccess")
     if (loginSuccess === "true") {
       setShowMessage(true)
       localStorage.removeItem("loginSuccess")
-
-      // Auto-hide the message after 3 seconds
-      const timer = setTimeout(() => {
-        setShowMessage(false)
-      }, 3000)
-
+      const timer = setTimeout(() => setShowMessage(false), 3000)
       return () => clearTimeout(timer)
     }
   }, [])
 
-  // Refresh blogs if a new post was created
   useEffect(() => {
     const newPostCreated = localStorage.getItem("newPostCreated")
     if (newPostCreated === "true") {
-      fetchBlogs(currentPage, pageSize)
+      fetchBlogs() 
+      fetchMostLikedBlogs() 
       localStorage.removeItem("newPostCreated")
     }
-  }, [])
+  }, []) 
 
-  useEffect(() => {
-    fetchMostLikedBlogs()
-  }, [])
+ useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, blogsPerPage])
 
-  const filteredBlogs = blogs.filter((blog) => blog.title.toLowerCase().includes(searchTerm.toLowerCase()))
 
-  // Calculate visible page range
-  const getVisiblePageRange = () => {
-    const delta = 1 // Number of pages to show on each side of current page
-    const range = []
-    const rangeWithDots = []
-    let l
+  const filteredBlogs = blogs.filter((blog) =>
+    blog.title.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
-    for (let i = 0; i < totalPages; i++) {
-      if (
-        i === 0 || // First page
-        i === totalPages - 1 || // Last page
-        (i >= currentPage - delta && i <= currentPage + delta) // Pages around current
-      ) {
-        range.push(i)
-      }
+  // Pagination logic (client-side)
+  const indexOfLastBlog = currentPage * blogsPerPage
+  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage
+  const currentBlogs = filteredBlogs.slice(indexOfFirstBlog, indexOfLastBlog)
+  const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage)
+
+  const handlePageSizeChange = (e) => {
+    const newSize = Number(e.target.value)
+    setBlogsPerPage(newSize)
+    
+  }
+
+   const scrollToAllBlogs = () => {
+    const allBlogsSection = document.getElementById("all-blogs-section")
+    if (allBlogsSection) {
+      allBlogsSection.scrollIntoView({ behavior: "smooth", block: "start" })
     }
+  }
 
-    for (const i of range) {
-      if (l) {
-        if (i - l === 2) {
-          rangeWithDots.push(l + 1)
-        } else if (i - l !== 1) {
-          rangeWithDots.push("...")
-        }
-      }
-      rangeWithDots.push(i)
-      l = i
-    }
-
-    return rangeWithDots
+  const handlePageButtonClick = (pageNumber) => {
+    setCurrentPage(pageNumber)
+    scrollToAllBlogs()
   }
 
   return (
@@ -164,7 +132,7 @@ const Homepage = () => {
         <NavBar
           setSearchTerm={setSearchTerm}
           resetPage={() => {
-            setCurrentPage(0)
+            setCurrentPage(1) // Reset to 1-based page
           }}
         />
       </header>
@@ -204,8 +172,8 @@ const Homepage = () => {
             </div>
           </div>
 
-          {/* Loading State */}
-          {loading && !paginationLoading ? (
+          {/* Loading State for initial load */}
+          {loading ? ( // Simplified loading state
             <div className="flex justify-center items-center my-16">
               <div className="relative">
                 <div className="w-12 h-12 rounded-full absolute border-4 border-gray-200"></div>
@@ -221,7 +189,6 @@ const Homepage = () => {
                   <h2 className="text-3xl font-bold text-gray-900">POPULAR BLOGS</h2>
                   <div className="ml-4 h-1 bg-blue-600 flex-grow rounded-full"></div>
                 </div>
-
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {mostLikedBlogs.slice(0, 4).map((blog) => (
                     <Link
@@ -229,7 +196,6 @@ const Homepage = () => {
                       key={blog._id}
                       className="flex bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:scale-[1.02] transition transform duration-300"
                     >
-                      {/* Image */}
                       <div className="flex-shrink-0 w-1/3">
                         <img
                           src={blog.imageCloudUrl || "/placeholder.svg"}
@@ -237,8 +203,6 @@ const Homepage = () => {
                           className="w-full h-full object-cover"
                         />
                       </div>
-
-                      {/* Content */}
                       <div className="flex-1 p-5 flex flex-col justify-between">
                         <div>
                           <span className="inline-block px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full mb-3">
@@ -246,7 +210,6 @@ const Homepage = () => {
                           </span>
                           <h3 className="text-xl font-bold text-gray-900 line-clamp-2 mb-2">{blog.title}</h3>
                         </div>
-
                         <div className="flex items-center mt-4">
                           <img
                             className="w-8 h-8 rounded-full object-cover border-2 border-blue-500"
@@ -296,29 +259,22 @@ const Homepage = () => {
                   <div className="ml-4 h-1 bg-blue-600 flex-grow rounded-full"></div>
                 </div>
 
-                {/* Pagination info */}
                 <div className="flex justify-between items-center mb-6">
                   <div className="text-sm text-gray-600">
-                    Showing <span className="font-medium">{filteredBlogs.length}</span> results
-                    {totalPages > 0 && (
-                      <>
+                    Showing <span className="font-medium">{currentBlogs.length}</span> of <span className="font-medium">{filteredBlogs.length}</span> results
+                    {filteredBlogs.length > 0 && totalPages > 0 && (
+                        <>
                         {" "}
-                        - Page <span className="font-medium">{currentPage + 1}</span> of{" "}
+                        - Page <span className="font-medium">{currentPage}</span> of{" "}
                         <span className="font-medium">{totalPages}</span>
-                      </>
+                        </>
                     )}
                   </div>
-
-                  {/* Page Size Selector */}
                   <div className="flex items-center">
                     <span className="text-sm text-gray-600 mr-2">Items per page:</span>
                     <select
-                      value={pageSize}
-                      onChange={(e) => {
-                        const newSize = Number(e.target.value)
-                        setPageSize(newSize)
-                        setCurrentPage(0) // Reset to first page when changing page size
-                      }}
+                      value={blogsPerPage}
+                      onChange={handlePageSizeChange}
                       className="border border-gray-300 rounded px-2 py-1 text-sm bg-white"
                     >
                       <option value={6}>6</option>
@@ -327,150 +283,48 @@ const Homepage = () => {
                     </select>
                   </div>
                 </div>
-
-                {/* Blog list with loading overlay */}
-                <div className="relative">
-                  {paginationLoading && (
-                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10 rounded-lg">
-                      <div className="flex items-center">
-                        <div className="relative">
-                          <div className="w-8 h-8 rounded-full absolute border-4 border-gray-200"></div>
-                          <div className="w-8 h-8 rounded-full animate-spin absolute border-4 border-blue-600 border-t-transparent"></div>
-                        </div>
-                        <p className="ml-3 text-gray-600 font-medium">Loading page {currentPage + 1}...</p>
-                      </div>
+                
+                {currentBlogs.length > 0 ? (
+                    <BlogList blogs={currentBlogs} setBlogs={setBlogs} layout="grid" />
+                ) : (
+                    <div className="text-center py-10">
+                        <p className="text-gray-500 text-lg">
+                            {searchTerm ? `No posts matching "${searchTerm}" were found.` : "No blog posts available."}
+                        </p>
                     </div>
-                  )}
-                  <BlogList blogs={filteredBlogs} setBlogs={setBlogs} layout="grid" />
-                </div>
+                )}
 
-                {/* Pagination */}
+
+                {/* Pagination - Styled like PopularPage */}
                 {totalPages > 1 && (
-                  <div className="mt-10 mb-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-center">
-                      <div className="text-sm text-gray-500 mb-4 sm:mb-0">
-                        Showing page {currentPage + 1} of {totalPages}
-                      </div>
-
-                      <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
-                        {/* First page button */}
-                        <button
-                          onClick={() => handlePageChange(0)}
-                          disabled={currentPage === 0}
-                          className={`relative inline-flex items-center px-2 py-2 rounded-l-md border ${
-                            currentPage === 0
-                              ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                          }`}
-                          aria-label="Go to first page"
-                        >
-                          <ChevronsLeft className="h-5 w-5" />
-                        </button>
-
-                        {/* Previous button */}
-                        <button
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 0}
-                          className={`relative inline-flex items-center px-2 py-2 border ${
-                            currentPage === 0
-                              ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                          }`}
-                          aria-label="Previous page"
-                        >
-                          <ChevronLeft className="h-5 w-5" />
-                        </button>
-
-                        {/* Page numbers */}
-                        {getVisiblePageRange().map((page, index) => {
-                          if (page === "...") {
-                            return (
-                              <span
-                                key={`ellipsis-${index}`}
-                                className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-gray-700"
-                              >
-                                ...
-                              </span>
-                            )
-                          }
-
-                          return (
-                            <button
-                              key={page}
-                              onClick={() => handlePageChange(page)}
-                              className={`relative inline-flex items-center px-4 py-2 border ${
-                                page === currentPage
-                                  ? "z-10 bg-blue-600 border-blue-600 text-white"
-                                  : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                              }`}
-                              aria-current={page === currentPage ? "page" : undefined}
-                            >
-                              {page + 1}
-                            </button>
-                          )
-                        })}
-
-                        {/* Next button */}
-                        <button
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage >= totalPages - 1}
-                          className={`relative inline-flex items-center px-2 py-2 border ${
-                            currentPage >= totalPages - 1
-                              ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                          }`}
-                          aria-label="Next page"
-                        >
-                          <ChevronRight className="h-5 w-5" />
-                        </button>
-
-                        {/* Last page button */}
-                        <button
-                          onClick={() => handlePageChange(totalPages - 1)}
-                          disabled={currentPage >= totalPages - 1}
-                          className={`relative inline-flex items-center px-2 py-2 rounded-r-md border ${
-                            currentPage >= totalPages - 1
-                              ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                          }`}
-                          aria-label="Go to last page"
-                        >
-                          <ChevronsRight className="h-5 w-5" />
-                        </button>
-                      </nav>
-                    </div>
-
-                    {/* Jump to page (on larger screens) */}
-                    <div className="hidden sm:flex justify-center mt-4">
-                      <div className="flex items-center">
-                        <span className="text-sm text-gray-600 mr-2">Jump to page:</span>
-                        <input
-                          type="number"
-                          min="1"
-                          max={totalPages}
-                          value={currentPage + 1}
-                          onChange={(e) => {
-                            const page = Number.parseInt(e.target.value, 10) - 1
-                            if (!isNaN(page) && page >= 0 && page < totalPages) {
-                              handlePageChange(page)
-                            }
-                          }}
-                          className="border border-gray-300 rounded w-16 px-2 py-1 text-sm"
-                        />
-                        <button
-                          onClick={() => {
-                            const input = document.querySelector('input[type="number"]')
-                            const page = Number.parseInt(input.value, 10) - 1
-                            if (!isNaN(page) && page >= 0 && page < totalPages) {
-                              handlePageChange(page)
-                            }
-                          }}
-                          className="ml-2 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                        >
-                          Go
-                        </button>
-                      </div>
-                    </div>
+                  <div className="flex justify-center mt-10 mb-6 space-x-2">
+                    <button
+                      onClick={() => handlePageButtonClick(Math.max(currentPage - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 rounded border border-gray-50 text-sm bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    {[...Array(totalPages)].map((_, idx) => (
+                      <button
+                        key={idx + 1}
+                        onClick={() => handlePageButtonClick(idx + 1)}
+                        className={`px-4 py-2 rounded border text-sm ${
+                          currentPage === idx + 1
+                            ? "text-blue-500 border-gray-50 bg-gray-50"
+                            : "bg-gray-50 text-gray-700 border-gray-50 hover:bg-gray-100"
+                        }`}
+                      > 
+                        {idx + 1}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => handlePageButtonClick(Math.min(currentPage + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 rounded border border-gray-50 text-sm bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
                   </div>
                 )}
               </section>
