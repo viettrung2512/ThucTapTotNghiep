@@ -1,14 +1,12 @@
 import PropTypes from "prop-types";
 import BlogItem from "./BlogItem";
 import { useState, useEffect } from "react";
-import { BsList, BsGrid3X3 } from "react-icons/bs"; // Các biểu tượng từ react-icons
+import { BsList, BsGrid3X3 } from "react-icons/bs"; 
 
 const BlogList = ({ blogs, setBlogs, layout }) => {
-  // Kiểm tra và lấy trạng thái layout từ localStorage khi component được render lần đầu
   const storedLayout = localStorage.getItem("layout") || layout || "grid";
   const [currentLayout, setCurrentLayout] = useState(storedLayout);
 
-  // Cập nhật trạng thái layout và lưu nó vào localStorage khi người dùng thay đổi layout
   useEffect(() => {
     localStorage.setItem("layout", currentLayout);
   }, [currentLayout]);
@@ -30,7 +28,6 @@ const BlogList = ({ blogs, setBlogs, layout }) => {
           <BsList className="text-black" />
         </div>
 
-        {/* Thanh chắn đen */}
         <div className="bg-gray-500 w-0.5 h-10 rounded-full "></div>
 
         <div
@@ -68,7 +65,7 @@ BlogList.propTypes = {
     })
   ).isRequired,
   setBlogs: PropTypes.func.isRequired,
-  layout: PropTypes.oneOf(["grid", "list"]), // Định dạng của layout, mặc định là "grid"
+  layout: PropTypes.oneOf(["grid", "list"]), 
 };
 
 export default BlogList;

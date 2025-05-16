@@ -217,7 +217,7 @@ const NotificationDropdown = () => {
                   <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
                 </svg>
                 <p className="empty-text">No notifications yet</p>
-                <p className="empty-subtext">We'll notify you when something important happens</p>
+                <p className="empty-subtext">Well notify you when something important happens</p>
               </div>
             )}
           </div>

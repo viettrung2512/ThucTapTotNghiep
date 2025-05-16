@@ -2,28 +2,24 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import NavBar from "../../../components/Header/NavBar";
 import SideBar from "../../../components/Sidebar/SideBar";
-import BlogList from "../../../components/Blog/BlogList"; // Đảm bảo bạn đã import BlogList
-
+import BlogList from "../../../components/Blog/BlogList"; 
 const TagList = () => {
-  const { categoryName } = useParams(); // Lấy category từ URL
+  const { categoryName } = useParams(); 
   const [blogs, setBlogs] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // State để theo dõi trạng thái loading
-
+  const [isLoading, setIsLoading] = useState(true); 
   useEffect(() => {
-    // Fetch các bài blog từ API
     fetch("http://localhost:8080/api/posts")
       .then((response) => response.json())
       .then((data) => {
-        // Lọc các bài blog có category trùng với categoryName
         const filteredBlogs = data.content.filter(
           (blog) => blog.category === categoryName
         );
-        setBlogs(filteredBlogs); // Lưu dữ liệu blog vào state
-        setIsLoading(false); // Cập nhật trạng thái loading sau khi lấy dữ liệu xong
+        setBlogs(filteredBlogs); 
+        setIsLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
-        setIsLoading(false); // Dù có lỗi hay không, hãy dừng trạng thái loading
+        setIsLoading(false); 
       });
   }, [categoryName]);
 
@@ -43,7 +39,7 @@ const TagList = () => {
             </h2>
             <div className="space-y-4">
               {isLoading ? (
-                <p>Loading...</p> // Hiển thị "Loading..." khi đang tải dữ liệu
+                <p>Loading...</p> 
               ) : (
                 <BlogList blogs={blogs} setBlogs={setBlogs} layout="grid" />
               )}

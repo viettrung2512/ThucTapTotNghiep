@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useState, useEffect, useRef } from "react";
 import { menu, close, logo } from "../../assets";
 import { useNavigate, Link } from "react-router-dom";
@@ -7,7 +6,6 @@ import NotificationDropdown from "../Notification/NotificationDropdown";
 
 const Navbar = () => {
   const [toggle, setToggle] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [user, setUser] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
@@ -59,11 +57,10 @@ const Navbar = () => {
     navigate("/newpost");
   };
 
-  // useEffect để ẩn dropdown khi nhấn ra ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false); // Ẩn dropdown khi nhấn ra ngoài
+        setShowDropdown(false); 
       }
     };
 
@@ -140,7 +137,7 @@ const Navbar = () => {
               </div>
               {showDropdown && (
                 <div
-                  ref={dropdownRef} // Gán ref vào dropdown
+                  ref={dropdownRef} 
                   className="absolute right-0 mt-12 w-40 rounded-xl bg-white border border-gray-600 shadow-lg z-20 transform translate-x-6"
                 >
                   <button

@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
-/* eslint-disable react/prop-types */
 const BlogCard = ({ blog, category, title, imageUrl }) => {
   const navigate = useNavigate();
 
   const handleNavigation = () => {
-    navigate(`/blog/${blog._id}`); // Điều hướng đến trang blogcontent
+    navigate(`/blog/${blog._id}`); 
   };
 
   return (
@@ -20,6 +20,12 @@ const BlogCard = ({ blog, category, title, imageUrl }) => {
       </div>
     </div>
   );
+};
+BlogCard.propTypes = {
+  blog: PropTypes.object.isRequired,
+  category: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  imageUrl: PropTypes.string.isRequired,
 };
 
 export default BlogCard;

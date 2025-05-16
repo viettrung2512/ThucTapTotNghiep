@@ -21,7 +21,6 @@ const NewPost = ({ token }) => {
   const [wordCount, setWordCount] = useState(0)
   const navigate = useNavigate()
 
-  // Popular categories for suggestions
   const popularCategories = [
     "Technology",
     "Travel",
@@ -33,10 +32,8 @@ const NewPost = ({ token }) => {
     "Entertainment",
   ]
 
-  // Calculate word count when content changes
   useEffect(() => {
     if (content) {
-      // Strip HTML tags and count words
       const text = content.replace(/<[^>]*>/g, "")
       const words = text.split(/\s+/).filter((word) => word.length > 0)
       setWordCount(words.length)
@@ -86,14 +83,10 @@ const NewPost = ({ token }) => {
       toast.error("Please select an image file")
       return
     }
-
-    // Check if file is an image
     if (!imageFile.type.match("image.*")) {
       toast.error("Please select an image file")
       return
     }
-
-    // Check file size (max 5MB)
     if (imageFile.size > 5 * 1024 * 1024) {
       toast.error("Image size should be less than 5MB")
       return
@@ -182,12 +175,9 @@ const NewPost = ({ token }) => {
         navigate(`/`)
       } else {
         let errorMessage = responseBody
-        try {
           const errorData = JSON.parse(responseBody)
           errorMessage = errorData.message || errorMessage
-        } catch {
-          // responseBody is not JSON
-        }
+
         toast.error(`Error: ${errorMessage}`)
       }
     } catch (error) {
@@ -208,7 +198,6 @@ const NewPost = ({ token }) => {
     }
   }
 
-  // Custom toolbar options for ReactQuill
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
@@ -229,7 +218,6 @@ const NewPost = ({ token }) => {
       </div>
 
       <div className="space-y-6">
-        {/* Title Input */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
             Title <span className="text-red-500">*</span>
@@ -250,7 +238,6 @@ const NewPost = ({ token }) => {
           {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
         </div>
 
-        {/* Category Input with Suggestions */}
         <div>
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
             Category <span className="text-red-500">*</span>
@@ -293,7 +280,6 @@ const NewPost = ({ token }) => {
           </div>
         </div>
 
-        {/* Tags Input */}
         <div>
           <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
             <Tag className="w-4 h-4 mr-1" /> Tags <span className="text-gray-500 text-xs ml-1">(comma separated)</span>
@@ -334,7 +320,6 @@ const NewPost = ({ token }) => {
           </div>
         </div>
 
-        {/* Image Upload */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Featured Image <span className="text-red-500">*</span>
@@ -387,7 +372,6 @@ const NewPost = ({ token }) => {
           {errors.image && <p className="mt-1 text-sm text-red-500">{errors.image}</p>}
         </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-end space-x-4 pt-6 border-t">
           <button
             type="button"

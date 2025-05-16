@@ -9,8 +9,6 @@ function SearchResults() {
   const [showResults, setShowResults] = useState(false);
   const prevSearchTerm = useRef(searchTerm);
   const navigate = useNavigate();
-
-  // Tạo ref cho phần kết quả tìm kiếm
   const searchResultsRef = useRef(null);
 
   useEffect(() => {
@@ -48,11 +46,10 @@ function SearchResults() {
     navigate(`/blog/${id}`);
   };
 
-  // Thêm event listener để ẩn kết quả khi nhấn ra ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchResultsRef.current && !searchResultsRef.current.contains(event.target)) {
-        setShowResults(false); // Ẩn kết quả khi nhấn ra ngoài
+        setShowResults(false);
       }
     };
 
@@ -77,7 +74,7 @@ function SearchResults() {
       </div>
       {showResults && (
         <div
-          ref={searchResultsRef} // Gán ref vào container kết quả
+          ref={searchResultsRef} 
           className="searchResultsContainer bg-white border border-gray-700"
         >
           {isLoading && <p>Loading results...</p>}

@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
-import BlogList from "../../../components/Blog/BlogList"
-import NavBar from "../../../components/Header/NavBar"
-import SideBar from "../../../components/Sidebar/SideBar"
-import { Bookmark, ChevronLeft, BookOpen, Search, Grid} from "lucide-react"
+import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import BlogList from "../../../components/Blog/BlogList";
+import NavBar from "../../../components/Header/NavBar";
+import SideBar from "../../../components/Sidebar/SideBar";
+import { Bookmark, ChevronLeft, BookOpen, Search, Grid } from "lucide-react";
 
 const SavedBlogsPage = () => {
-  const [savedBlogs, setSavedBlogs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [alertShown] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [viewMode, setViewMode] = useState("grid") // grid or list
-  const navigate = useNavigate()
+  const [savedBlogs, setSavedBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [alertShown] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState("grid");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSavedBlogs = async () => {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       if (!token && !alertShown) {
-        navigate("/*")
-        return
+        navigate("/*");
+        return;
       }
 
       try {
@@ -30,45 +30,41 @@ const SavedBlogsPage = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        })
+        });
 
         if (response.ok) {
-          const data = await response.json()
-          setSavedBlogs(data)
+          const data = await response.json();
+          setSavedBlogs(data);
         } else {
-          const errorData = await response.json()
-          console.error("Error fetching saved blogs:", errorData.message)
+          const errorData = await response.json();
+          console.error("Error fetching saved blogs:", errorData.message);
         }
       } catch (error) {
-        console.error("API connection error:", error)
+        console.error("API connection error:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchSavedBlogs()
-  }, [alertShown, navigate])
+    fetchSavedBlogs();
+  }, [alertShown, navigate]);
 
-  // Filter blogs based on search term
-  const filteredBlogs = savedBlogs.filter((blog) => blog.title?.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredBlogs = savedBlogs.filter((blog) =>
+    blog.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="bg-gray-50 min-h-screen text-gray-900">
-      {/* Header */}
       <header className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
         <NavBar />
       </header>
 
-      {/* Sidebar and Content */}
       <div className="flex pt-16">
-        {/* Sidebar */}
         <aside className="fixed top-16 left-0 h-[calc(100vh-4rem)] bg-gray-900 w-60 z-40 shadow-lg">
           <SideBar />
         </aside>
 
-        {/* Main Content */}
         <div className="ml-60 flex-grow p-6">
-          {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
             <div className="flex items-center mb-4 md:mb-0">
               <button
@@ -84,7 +80,6 @@ const SavedBlogsPage = () => {
               </h1>
             </div>
 
-            {/* Search and View Controls */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -115,7 +110,6 @@ const SavedBlogsPage = () => {
             </div>
           </div>
 
-          {/* Stats Card */}
           <div className="bg-white rounded-xl shadow-md p-6 mb-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="flex items-center">
@@ -124,7 +118,9 @@ const SavedBlogsPage = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Total Bookmarks</p>
-                  <p className="text-2xl font-bold text-gray-900">{savedBlogs.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {savedBlogs.length}
+                  </p>
                 </div>
               </div>
 
@@ -160,14 +156,15 @@ const SavedBlogsPage = () => {
                 <div>
                   <p className="text-sm text-gray-500">Last Saved</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {savedBlogs.length > 0 ? new Date(savedBlogs[0].createdAt).toLocaleDateString() : "N/A"}
+                    {savedBlogs.length > 0
+                      ? new Date(savedBlogs[0].createdAt).toLocaleDateString()
+                      : "N/A"}
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Content */}
           {loading ? (
             <div className="bg-white rounded-xl shadow-md p-12 text-center">
               <div className="flex flex-col items-center justify-center">
@@ -175,13 +172,19 @@ const SavedBlogsPage = () => {
                   <div className="w-16 h-16 rounded-full absolute border-4 border-gray-200"></div>
                   <div className="w-16 h-16 rounded-full animate-spin absolute border-4 border-purple-600 border-t-transparent"></div>
                 </div>
-                <p className="mt-8 text-xl font-medium text-gray-700">Loading your bookmarks...</p>
+                <p className="mt-8 text-xl font-medium text-gray-700">
+                  Loading your bookmarks...
+                </p>
                 <p className="mt-2 text-gray-500">This may take a moment</p>
               </div>
             </div>
           ) : filteredBlogs.length > 0 ? (
             <div className="bg-white rounded-xl shadow-md p-6">
-              <BlogList blogs={filteredBlogs} setBlogs={setSavedBlogs} layout={viewMode} />
+              <BlogList
+                blogs={filteredBlogs}
+                setBlogs={setSavedBlogs}
+                layout={viewMode}
+              />
             </div>
           ) : (
             <div className="bg-white rounded-xl shadow-md p-12 text-center">
@@ -189,7 +192,9 @@ const SavedBlogsPage = () => {
                 <Bookmark className="h-12 w-12 text-purple-300" />
               </div>
               <h3 className="text-2xl font-semibold text-gray-800 mb-3">
-                {searchTerm ? "No matching bookmarks found" : "No bookmarks yet"}
+                {searchTerm
+                  ? "No matching bookmarks found"
+                  : "No bookmarks yet"}
               </h3>
               <p className="text-gray-600 mb-8 max-w-md mx-auto">
                 {searchTerm
@@ -207,7 +212,12 @@ const SavedBlogsPage = () => {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h7"
+                  />
                 </svg>
                 Explore Articles
               </Link>
@@ -216,7 +226,7 @@ const SavedBlogsPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SavedBlogsPage
+export default SavedBlogsPage;

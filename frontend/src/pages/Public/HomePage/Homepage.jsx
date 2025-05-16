@@ -1,152 +1,165 @@
-import { useEffect, useState } from "react"
-import NavBar from "../../../components/Header/NavBar"
-import SideBar from "../../../components/Sidebar/SideBar"
-import BlogList from "../../../components/Blog/BlogList"
-import TopAuthors from "../../../components/Author/TopAuthors"
-import { Link } from "react-router-dom"
+import { useEffect, useState } from "react";
+import NavBar from "../../../components/Header/NavBar";
+import SideBar from "../../../components/Sidebar/SideBar";
+import BlogList from "../../../components/Blog/BlogList";
+import TopAuthors from "../../../components/Author/TopAuthors";
+import { Link } from "react-router-dom";
 
 const Homepage = () => {
-  const [blogs, setBlogs] = useState([]) // Stores all blogs from API
-  const [mostLikedBlogs, setMostLikedBlogs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [showMessage, setShowMessage] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [currentPage, setCurrentPage] = useState(1) // 1-based current page
-  const [blogsPerPage, setBlogsPerPage] = useState(6) // Renamed from pageSize
+  const [blogs, setBlogs] = useState([]);
+  const [mostLikedBlogs, setMostLikedBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showMessage, setShowMessage] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [blogsPerPage, setBlogsPerPage] = useState(6);
 
-  // Fetch all blogs (no pagination parameters)
+  const getCurrentUserId = () => {
+    return localStorage.getItem("userId");
+  };
+
   const fetchBlogs = async () => {
-    const token = localStorage.getItem("token")
-    setLoading(true)
+    const token = localStorage.getItem("token");
+    const userId = getCurrentUserId();
+    setLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:8080/api/posts`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await fetch(
+        `http://localhost:8080/api/posts${userId ? `?userId=${userId}` : ''}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
-        const data = await response.json()
-        // Assuming data is an array of blogs, if it's an object like { content: [] }, adjust accordingly
-        setBlogs(Array.isArray(data) ? data : data.content || [])
+        const data = await response.json();
+        const blogsData = Array.isArray(data) ? data : data.content || [];
+        setBlogs(blogsData);
       } else {
-        const errorData = await response.json()
-        console.error("Lỗi khi lấy danh sách blog:", errorData.message)
-        setBlogs([])
+        const errorData = await response.json();
+        console.error("Lỗi khi lấy danh sách blog:", errorData.message);
+        setBlogs([]);
       }
     } catch (error) {
-      console.error("Lỗi kết nối API:", error)
-      setBlogs([])
+      console.error("Lỗi kết nối API:", error);
+      setBlogs([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const fetchMostLikedBlogs = async () => {
-    const token = localStorage.getItem("token")
+    const token = localStorage.getItem("token");
+    const userId = getCurrentUserId();
+
     try {
-      const mostLikedResponse = await fetch("http://localhost:8080/api/posts/most-liked", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const mostLikedResponse = await fetch(
+        `http://localhost:8080/api/posts/most-liked${userId ? `?userId=${userId}` : ''}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (mostLikedResponse.ok) {
-        const mostLikedData = await mostLikedResponse.json()
-        setMostLikedBlogs(mostLikedData.content || [])
+        const mostLikedData = await mostLikedResponse.json();
+        const mostLikedBlogsData = mostLikedData.content || [];
+        setMostLikedBlogs(mostLikedBlogsData);
       } else {
-        const errorData = await mostLikedResponse.json()
-        console.error("Lỗi khi lấy bài blog được thích nhiều nhất:", errorData.message)
+        const errorData = await mostLikedResponse.json();
+        console.error("Lỗi khi lấy bài blog được thích nhiều nhất:", errorData.message);
       }
     } catch (error) {
-      console.error("Lỗi kết nối API:", error)
+      console.error("Lỗi kết nối API:", error);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchBlogs()
-    fetchMostLikedBlogs()
-  }, [])
+    fetchBlogs();
+    fetchMostLikedBlogs();
+  }, []);
 
   useEffect(() => {
-    const loginSuccess = localStorage.getItem("loginSuccess")
+    const loginSuccess = localStorage.getItem("loginSuccess");
     if (loginSuccess === "true") {
-      setShowMessage(true)
-      localStorage.removeItem("loginSuccess")
-      const timer = setTimeout(() => setShowMessage(false), 3000)
-      return () => clearTimeout(timer)
+      setShowMessage(true);
+      localStorage.removeItem("loginSuccess");
+      const timer = setTimeout(() => setShowMessage(false), 3000);
+      return () => clearTimeout(timer);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    const newPostCreated = localStorage.getItem("newPostCreated")
+    const newPostCreated = localStorage.getItem("newPostCreated");
     if (newPostCreated === "true") {
-      fetchBlogs() 
-      fetchMostLikedBlogs() 
-      localStorage.removeItem("newPostCreated")
+      fetchBlogs();
+      fetchMostLikedBlogs();
+      localStorage.removeItem("newPostCreated");
     }
-  }, []) 
+  }, []);
 
- useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, blogsPerPage])
-
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, blogsPerPage]);
 
   const filteredBlogs = blogs.filter((blog) =>
     blog.title.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  );
 
-  // Pagination logic (client-side)
-  const indexOfLastBlog = currentPage * blogsPerPage
-  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage
-  const currentBlogs = filteredBlogs.slice(indexOfFirstBlog, indexOfLastBlog)
-  const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage)
+  const indexOfLastBlog = currentPage * blogsPerPage;
+  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
+  const currentBlogs = filteredBlogs.slice(indexOfFirstBlog, indexOfLastBlog);
+  const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage);
 
   const handlePageSizeChange = (e) => {
-    const newSize = Number(e.target.value)
-    setBlogsPerPage(newSize)
-    
-  }
-
-   const scrollToAllBlogs = () => {
-    const allBlogsSection = document.getElementById("all-blogs-section")
-    if (allBlogsSection) {
-      allBlogsSection.scrollIntoView({ behavior: "smooth", block: "start" })
+    const newSize = Number(e.target.value);
+    if (!isNaN(newSize) && newSize > 0) {
+       setBlogsPerPage(newSize);
+    } else {
+        console.warn("Invalid page size selected:", e.target.value);
     }
-  }
+  };
+
+  const scrollToAllBlogs = () => {
+    const allBlogsSection = document.getElementById("all-blogs-section");
+    if (allBlogsSection) {
+      allBlogsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const handlePageButtonClick = (pageNumber) => {
-    setCurrentPage(pageNumber)
-    scrollToAllBlogs()
-  }
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+        setCurrentPage(pageNumber);
+        scrollToAllBlogs();
+    } else {
+        console.warn("Attempted to navigate to invalid page number:", pageNumber);
+    }
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen text-gray-900">
-      {/* Header */}
       <header className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
         <NavBar
           setSearchTerm={setSearchTerm}
           resetPage={() => {
-            setCurrentPage(1) // Reset to 1-based page
+            setCurrentPage(1);
           }}
         />
       </header>
 
-      {/* Sidebar and Content */}
       <div className="flex pt-16">
-        {/* Sidebar */}
         <aside className="fixed top-16 left-0 h-[calc(100vh-4rem)] bg-gray-900 w-60 z-40 shadow-lg">
           <SideBar />
         </aside>
 
-        {/* Main Content */}
         <div className="ml-60 flex-grow p-6">
-          {/* Success Message */}
           {showMessage && (
             <div className="fixed top-20 right-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg z-50 animate-fade-in-out">
               <div className="flex items-center">
@@ -158,7 +171,6 @@ const Homepage = () => {
             </div>
           )}
 
-          {/* Hero Banner Section */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-800 rounded-2xl shadow-xl mb-10 overflow-hidden">
             <div className="max-w-7xl mx-auto px-8 py-16">
               <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white leading-tight">
@@ -172,8 +184,7 @@ const Homepage = () => {
             </div>
           </div>
 
-          {/* Loading State for initial load */}
-          {loading ? ( // Simplified loading state
+          {loading ? (
             <div className="flex justify-center items-center my-16">
               <div className="relative">
                 <div className="w-12 h-12 rounded-full absolute border-4 border-gray-200"></div>
@@ -183,7 +194,6 @@ const Homepage = () => {
             </div>
           ) : (
             <>
-              {/* Popular Blogs Section */}
               <section className="mb-12">
                 <div className="flex items-center mb-6">
                   <h2 className="text-3xl font-bold text-gray-900">POPULAR BLOGS</h2>
@@ -213,11 +223,11 @@ const Homepage = () => {
                         <div className="flex items-center mt-4">
                           <img
                             className="w-8 h-8 rounded-full object-cover border-2 border-blue-500"
-                            src={blog.author.profilePicture || "/placeholder.svg"}
-                            alt={blog.author.name}
+                            src={blog.author?.profilePicture || "/placeholder.svg"}
+                            alt={blog.author?.name || "Unknown Author"}
                           />
                           <div className="ml-3">
-                            <p className="text-sm font-medium text-gray-900">{blog.author.name}</p>
+                            <p className="text-sm font-medium text-gray-900">{blog.author?.name || "Unknown"}</p>
                           </div>
                         </div>
                       </div>
@@ -226,7 +236,6 @@ const Homepage = () => {
                 </div>
               </section>
 
-              {/* Banner Ad Section */}
               <div className="my-12 flex justify-center">
                 <div className="relative w-full max-w-5xl overflow-hidden rounded-xl shadow-lg">
                   <img
@@ -243,7 +252,6 @@ const Homepage = () => {
                 </div>
               </div>
 
-              {/* Top Authors Section */}
               <section className="mb-12">
                 <div className="flex items-center mb-6">
                   <h2 className="text-3xl font-bold text-gray-900">TOP AUTHORS</h2>
@@ -252,7 +260,6 @@ const Homepage = () => {
                 <TopAuthors />
               </section>
 
-              {/* All Blogs Section */}
               <section id="all-blogs-section" className="mb-12">
                 <div className="flex items-center mb-6">
                   <h2 className="text-3xl font-bold text-gray-900">ALL BLOGS</h2>
@@ -263,11 +270,11 @@ const Homepage = () => {
                   <div className="text-sm text-gray-600">
                     Showing <span className="font-medium">{currentBlogs.length}</span> of <span className="font-medium">{filteredBlogs.length}</span> results
                     {filteredBlogs.length > 0 && totalPages > 0 && (
-                        <>
-                        {" "}
-                        - Page <span className="font-medium">{currentPage}</span> of{" "}
-                        <span className="font-medium">{totalPages}</span>
-                        </>
+                      <>
+                      {" "}
+                      - Page <span className="font-medium">{currentPage}</span> of{" "}
+                      <span className="font-medium">{totalPages}</span>
+                      </>
                     )}
                   </div>
                   <div className="flex items-center">
@@ -283,7 +290,7 @@ const Homepage = () => {
                     </select>
                   </div>
                 </div>
-                
+
                 {currentBlogs.length > 0 ? (
                     <BlogList blogs={currentBlogs} setBlogs={setBlogs} layout="grid" />
                 ) : (
@@ -294,8 +301,6 @@ const Homepage = () => {
                     </div>
                 )}
 
-
-                {/* Pagination - Styled like PopularPage */}
                 {totalPages > 1 && (
                   <div className="flex justify-center mt-10 mb-6 space-x-2">
                     <button
@@ -314,7 +319,7 @@ const Homepage = () => {
                             ? "text-blue-500 border-gray-50 bg-gray-50"
                             : "bg-gray-50 text-gray-700 border-gray-50 hover:bg-gray-100"
                         }`}
-                      > 
+                      >
                         {idx + 1}
                       </button>
                     ))}
@@ -333,7 +338,7 @@ const Homepage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Homepage
+export default Homepage;

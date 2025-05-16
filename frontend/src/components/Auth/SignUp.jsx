@@ -7,16 +7,13 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  // eslint-disable-next-line no-unused-vars
-  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
-  // Kiểm tra token và điều hướng nếu đã đăng nhập
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      navigate("/");  // Redirect to home page if token exists
+      navigate("/");  
     }
   }, [navigate]);
 
@@ -27,15 +24,14 @@ const Signup = () => {
       const response = await fetch('http://localhost:8080/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, username, password }), // Cập nhật gửi dữ liệu đúng
+        body: JSON.stringify({ name, email, username, password }), 
       });
 
       if (!response.ok) {
         throw new Error('Signup failed');
       }
 
-      // eslint-disable-next-line no-unused-vars
-      const data = await response.json();
+      await response.json();
       toast.success("Signup successful! Please log in.", {
         position: "top-right",
         autoClose: 3000,
@@ -46,10 +42,8 @@ const Signup = () => {
         progress: undefined,
       });
 
-      // Sau khi đăng ký thành công, chuyển hướng tới trang Login
       navigate("/login");
     } catch (err) {
-      setError(err.message);
       toast.error(err.message, {
         position: "top-right",
         autoClose: 3000,

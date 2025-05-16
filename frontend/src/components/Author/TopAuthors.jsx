@@ -22,8 +22,6 @@ const TopAuthors = () => {
           throw new Error("Failed to fetch top authors");
         }
         const data = await response.json();
-
-        // Map data to get the top authors and fetch their followers
         const topAuthors = await Promise.all(
           data.slice(0, 4).map(async (author) => {
             const followersResponse = await fetch(
@@ -34,8 +32,8 @@ const TopAuthors = () => {
               id: author.id,
               postCount: author.postCount,
               followerNumber: author.followerNumber,
-              followersCount: followersData.length, // Changed to followersCount
-              ...author.userDetails[0], // Assuming userDetails is an array
+              followersCount: followersData.length, 
+              ...author.userDetails[0], 
             };
           })
         );

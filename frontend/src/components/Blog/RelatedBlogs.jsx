@@ -1,6 +1,7 @@
-/* eslint-disable react/prop-types */
+
 import BlogCard from "./BlogCard";
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 
 const RelatedBlogs = ({ tag, postId }) => {
   const [blogs, setBlogs] = useState(null);
@@ -52,6 +53,10 @@ const RelatedBlogs = ({ tag, postId }) => {
       </div>
     </div>
   );
+};
+RelatedBlogs.propTypes = {
+  tag: PropTypes.string.isRequired,
+  postId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
 export default RelatedBlogs;

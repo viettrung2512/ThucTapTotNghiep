@@ -2,31 +2,22 @@ import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import SaveButton from "../Button/SaveButton";
 import LikeButton from "../Button/LikeButton";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const BlogItem = ({ blog, setBlogs }) => {
   const navigate = useNavigate();
-  // Local state for likes and isLiked
+
   const [likes, setLikes] = useState(blog.likeCnt || 0);
   const [isLiked, setIsLiked] = useState(blog.liked || false);
   const [isSaved, setIsSaved] = useState(blog.saved || false);
-
-  // Sync isSaved state when blog.saved prop changes
-  useEffect(() => {
-    setIsSaved(blog.saved || false);
-  }, [blog.saved]);
 
   const handleNavigate = () => {
     navigate(`/blog/${blog._id}`);
   };
 
   return (
-    <div
-      className="block cursor-pointer"
-      onClick={handleNavigate}
-    >
-      <div className="relative flex items-center border border-gray-100 bg-white rounded-lg hover:shadow-xl hover:scale-[1.02] transition transform duration-300  h-36 overflow-hidden">
-        {/* Image on the left */}
+    <div className="block cursor-pointer" onClick={handleNavigate}>
+      <div className="relative flex items-center border border-gray-100 bg-white rounded-lg hover:shadow-xl hover:scale-[1.02] transition transform duration-300 h-36 overflow-hidden">
         <div className="flex-shrink-0 w-1/4 h-36">
           <img
             className="w-full h-full object-cover rounded-l-lg"
@@ -35,20 +26,23 @@ const BlogItem = ({ blog, setBlogs }) => {
           />
         </div>
 
-        {/* Content area */}
         <div className="flex-1 p-4 flex flex-col justify-between">
-          {/* Save Button at top-right */}
-          <div className="absolute top-2 right-5">
+          <div
+            className="absolute top-2 right-5"
+            onClick={(e) => e.stopPropagation()}
+          >
             <SaveButton
               blog={blog}
+              blogId={blog._id}
               setBlogs={setBlogs}
               isSaved={isSaved}
               setIsSaved={setIsSaved}
             />
           </div>
-
-          {/* Like Button at bottom-right */}
-          <div className="absolute bottom-2 right-2">
+          <div
+            className="absolute bottom-2 right-2"
+            onClick={(e) => e.stopPropagation()}
+          >
             <LikeButton
               blogId={blog._id}
               likes={likes}
@@ -59,18 +53,14 @@ const BlogItem = ({ blog, setBlogs }) => {
             />
           </div>
 
-          {/* Blog content */}
-          {/* Category nằm trên cùng */}
           <span className="text-xl font-medium text-gray-500 block mb-2">
             {blog.category}
           </span>
 
-          {/* Blog title */}
           <h3 className="text-2xl font-semibold text-black truncate overflow-hidden whitespace-nowrap">
             {blog.title}
           </h3>
 
-          {/* Author and createdAt */}
           <div className="flex items-center space-x-3 pt-2">
             {blog.author ? (
               <>
@@ -89,9 +79,10 @@ const BlogItem = ({ blog, setBlogs }) => {
                 <h1 className="text-xs font-medium text-black">Unknown</h1>
               </>
             )}
-            {/* Thêm ngày tạo blog */}
             <span className="text-xs text-gray-500">
-              {new Date(blog.createdAt).toLocaleDateString("en-GB")}
+              {blog.createdAt
+                ? new Date(blog.createdAt).toLocaleDateString("en-GB")
+                : "N/A"}
             </span>
           </div>
         </div>
@@ -115,9 +106,10 @@ BlogItem.propTypes = {
       id: PropTypes.string,
       name: PropTypes.string,
       profilePicture: PropTypes.string,
+      username: PropTypes.string,
     }),
   }).isRequired,
-  setBlogs: PropTypes.func.isRequired,
+  setBlogs: PropTypes.func,
 };
 
 export default BlogItem;

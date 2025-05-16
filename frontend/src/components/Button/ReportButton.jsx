@@ -1,9 +1,8 @@
-import React, { useState } from "react";
 import { toast } from 'react-toastify';
 import { MdReport } from "react-icons/md";
+import PropTypes from 'prop-types';
 
 const ReportButton = ({ reportText, type, id, message }) => {
-  const [reportStatus, setReportStatus] = useState(null);
 
   const reportContent = async () => {
     try {
@@ -30,7 +29,10 @@ const ReportButton = ({ reportText, type, id, message }) => {
       }
     } catch (error) {
       console.error("Error:", error);
-      setReportStatus("An error occurred while submitting the report.");
+      toast.error("An error occurred while submitting the report.", {
+        position: 'top-right',
+        autoClose: 3000,
+      });
     }
   };
 
@@ -43,6 +45,12 @@ const ReportButton = ({ reportText, type, id, message }) => {
       {message === "Report Post" ? <MdReport size={24} className="hover:text-red-500 cursor-pointer" /> : message}
     </button>
   );
+};
+ReportButton.propTypes = {
+  reportText: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  message: PropTypes.string.isRequired,
 };
 
 export default ReportButton;

@@ -29,7 +29,6 @@ const FollowButton = ({ userId, isFollowing, setIsFollowing, onFollowChange }) =
 
             if (response.ok) {
                 setIsFollowing(!isFollowing);
-                // Notify the parent about the follower count change
                 onFollowChange(isFollowing ? -1 : 1);
             } else {
                 const errorData = await response.json();
@@ -58,7 +57,7 @@ FollowButton.propTypes = {
     userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     isFollowing: PropTypes.bool,
     setIsFollowing: PropTypes.func,
-    onFollowChange: PropTypes.func.isRequired, // Ensure the parent provides this callback
+    onFollowChange: PropTypes.func.isRequired, 
 };
 
 export default FollowButton;

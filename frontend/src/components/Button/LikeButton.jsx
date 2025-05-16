@@ -29,21 +29,22 @@ const LikeButton = ({ blogId, likes, isLiked, setLikes, setIsLiked, setBlogs }) 
 				return;
 			}
 
-			// Update the likes and isLiked state
 			const newLikes = isLiked ? likes - 1 : likes + 1;
 			setLikes(newLikes);
 			setIsLiked(!isLiked);
 
-			// Update blogs list in the parent
-			setBlogs((prevBlogs) => prevBlogs.map((blog) => (blog.id === blogId ? { ...blog, likes: newLikes, isLiked: !isLiked } : blog)));
+			setBlogs((prevBlogs) => prevBlogs.map((blog) => (blog._id === blogId ? { ...blog, likeCnt: newLikes, liked: !isLiked } : blog)));
 		} catch (error) {
 			console.error('Lỗi khi like/unlike:', error);
 		}
 	};
 
 	return (
-		<div onClick={handleToggleLike} className={`flex items-center space-x-1 cursor-pointer ${isLiked ? 'text-red-500' : 'hover:text-red-500'}`}>
-			<FaHeart />
+		<div
+			onClick={handleToggleLike}
+			className={`like-icon-container flex items-center space-x-1 cursor-pointer ${isLiked ? 'text-red-500' : 'hover:text-red-500'}`}
+		>
+			<FaHeart style={{ fill: 'currentColor' }} />
 			<span>{likes}</span>
 		</div>
 	);

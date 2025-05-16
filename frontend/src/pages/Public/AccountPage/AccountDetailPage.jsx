@@ -33,7 +33,6 @@ const AccountDetailPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
-  // Fetch user data when the component mounts
   useEffect(() => {
     if (!token) {
       toast.error("You need to log in to view account information.");
@@ -56,7 +55,7 @@ const AccountDetailPage = () => {
             avatar: data.profilePicture || user.avatar,
             name: data.name || username || "",
             email: data.email || "",
-            password: "", // Do not expose password for security reasons
+            password: "",
           };
           setUser(userData);
           setEditedUser(userData);
@@ -78,7 +77,6 @@ const AccountDetailPage = () => {
     if (name === "avatar" && files.length > 0) {
       const file = files[0];
 
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error("Image size should be less than 5MB");
         return;
@@ -87,7 +85,7 @@ const AccountDetailPage = () => {
       setUploadingAvatar(true);
       const reader = new FileReader();
       reader.onload = () => {
-        setEditedUser({ ...editedUser, avatar: reader.result }); // Base64 image
+        setEditedUser({ ...editedUser, avatar: reader.result }); 
         setUploadingAvatar(false);
       };
       reader.readAsDataURL(file);
@@ -97,7 +95,6 @@ const AccountDetailPage = () => {
   };
 
   const handleSaveChanges = async () => {
-    // Validate inputs
     if (!editedUser.name.trim()) {
       toast.error("Name cannot be empty");
       return;
@@ -107,8 +104,6 @@ const AccountDetailPage = () => {
       toast.error("Email cannot be empty");
       return;
     }
-
-    // Simple email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(editedUser.email)) {
       toast.error("Please enter a valid email address");
@@ -123,7 +118,6 @@ const AccountDetailPage = () => {
       profilePicture: editedUser.avatar,
     };
 
-    // Only send the new password if the user has changed it
     if (editedUser.password) {
       updatedUserInfo.password = editedUser.password;
     }
@@ -144,15 +138,11 @@ const AccountDetailPage = () => {
 
         setUser({ ...updatedUser });
 
-        // Update localStorage with the new values
         localStorage.setItem("username", updatedUser.name);
         localStorage.setItem("profilePicture", updatedUser.profilePicture);
         localStorage.setItem("email", updatedUser.email);
 
-        // Show success message
         toast.success("Account updated successfully!");
-
-        // Navigate after a short delay to allow the toast to be seen
         setTimeout(() => {
           navigate("/");
         }, 1500);
@@ -176,8 +166,6 @@ const AccountDetailPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
-        {/* Header */}
-        {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white relative">
           <div className="flex justify-between items-center">
             <button
@@ -197,7 +185,6 @@ const AccountDetailPage = () => {
             </button>
           </div>
         </div>
-        {/* Profile Picture */}
         <div className="relative -mt-5 flex justify-center">
           <div className="relative">
             <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200">
@@ -229,20 +216,17 @@ const AccountDetailPage = () => {
           </div>
         </div>
 
-        {/* User Info */}
         <div className="text-center px-6 pt-2 pb-4">
           <h2 className="text-xl font-bold text-gray-800">{user.name}</h2>
           <p className="text-gray-600">{user.email}</p>
         </div>
 
-        {/* Form */}
         <div className="px-6 pb-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">
             Edit Profile
           </h3>
 
           <div className="space-y-4">
-            {/* Name Input */}
             <div>
               <label
                 htmlFor="name"
@@ -266,7 +250,6 @@ const AccountDetailPage = () => {
               </div>
             </div>
 
-            {/* Email Input */}
             <div>
               <label
                 htmlFor="email"
@@ -290,7 +273,6 @@ const AccountDetailPage = () => {
               </div>
             </div>
 
-            {/* Password Input */}
             <div>
               <label
                 htmlFor="password"
@@ -332,7 +314,6 @@ const AccountDetailPage = () => {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="mt-6 flex justify-end space-x-3">
             <button
               onClick={handleGoHome}

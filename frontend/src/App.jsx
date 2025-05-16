@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { GoogleOAuthProvider } from "@react-oauth/google"; // Import GoogleOAuthProvider
+import { GoogleOAuthProvider } from "@react-oauth/google"; 
 import "react-toastify/dist/ReactToastify.css";
 
 import Header from "./pages/Admin/Header";
@@ -32,7 +32,6 @@ import {
   SettingPage,
 } from "./pages/Admin";
 
-// Helper function to get user role from localStorage
 const getUserRole = () => localStorage.getItem("userRole");
 
 const AdminLayout = () => {
@@ -82,7 +81,6 @@ const AdminLayout = () => {
   );
 };
 
-// Role-based Route Protection for Admin Pages
 import PropTypes from "prop-types";
 
 const AdminRoute = ({ children }) => {
@@ -99,7 +97,6 @@ const App = () => {
     <GoogleOAuthProvider clientId="676959420577-hjks9prgmq21oouea14iqf3heej9k0ic.apps.googleusercontent.com"> 
       <ToastContainer />
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<Homepage />} />
         <Route path="/blog/:id" element={<BlogContentPage />} />
         <Route path="/about" element={<Aboutpage />} />
@@ -116,7 +113,6 @@ const App = () => {
         <Route path="/popular" element={<PopularPage />} />
         <Route path="/feedback" element={<FeedbackPage />} />
 
-        {/* Admin Routes */}
         <Route
           path="/admin/*"
           element={
@@ -125,8 +121,6 @@ const App = () => {
             </AdminRoute>
           }
         />
-
-        {/* Fallback Route */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </GoogleOAuthProvider>

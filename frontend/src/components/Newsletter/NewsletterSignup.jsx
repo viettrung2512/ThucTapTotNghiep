@@ -8,7 +8,6 @@ const NewsletterSignup = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (email && name) {
-      // Gửi dữ liệu lên server hoặc thực hiện hành động khác
       console.log("Email:", email, "Name:", name);
       setIsSubmitted(true);
     }
