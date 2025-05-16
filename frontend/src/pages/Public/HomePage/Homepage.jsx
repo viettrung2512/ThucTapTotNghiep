@@ -267,7 +267,7 @@ const Homepage = () => {
               <div className="my-12 flex justify-center">
                 <div className="relative w-full max-w-5xl overflow-hidden rounded-xl shadow-lg">
                   <img
-                    src="/public/freepik-export-20241219071211VKAR.jpeg"
+                    src="/freepik-export-20241219071211VKAR.jpeg"
                     alt="Technology banner"
                     className="w-full h-auto object-cover"
                   />

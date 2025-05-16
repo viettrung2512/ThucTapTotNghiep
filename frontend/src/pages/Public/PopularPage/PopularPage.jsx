@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import NavBar from "../../../components/Header/NavBar"
 import SideBar from "../../../components/Sidebar/SideBar"
@@ -10,7 +8,9 @@ const PopularPage = () => {
   const [blogs, setBlogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [timeFilter, setTimeFilter] = useState("all") // all, week, month, year
+  const [timeFilter, setTimeFilter] = useState("all")
+  const [currentPage, setCurrentPage] = useState(1)
+  const blogsPerPage = 6
 
   const fetchPopularBlogs = async () => {
     const token = localStorage.getItem("token")
@@ -48,11 +48,22 @@ const PopularPage = () => {
     }
   }
 
-  const filteredBlogs = blogs.filter((blog) => blog.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredBlogs = blogs.filter((blog) =>
+    blog.title.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const indexOfLastBlog = currentPage * blogsPerPage
+  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage
+  const currentBlogs = filteredBlogs.slice(indexOfFirstBlog, indexOfLastBlog)
+  const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage)
 
   useEffect(() => {
     fetchPopularBlogs()
   }, [timeFilter])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, timeFilter])
 
   return (
     <div className="bg-gray-50 min-h-screen text-gray-900">
@@ -64,7 +75,6 @@ const PopularPage = () => {
           <SideBar />
         </aside>
         <section className="flex-1 p-6 max-w-6xl mx-auto">
-          {/* Hero section */}
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 mb-8 mt-16 shadow-lg text-white">
             <div className="flex items-center mb-4">
               <TrendingUp className="w-8 h-8 mr-3" />
@@ -75,44 +85,29 @@ const PopularPage = () => {
               of readers worldwide.
             </p>
 
-            {/* Time filter */}
             <div className="mt-6 flex flex-wrap gap-2">
-              <button
-                onClick={() => setTimeFilter("all")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  timeFilter === "all" ? "bg-white text-indigo-600" : "bg-indigo-700 text-white hover:bg-indigo-800"
-                }`}
-              >
-                All Time
-              </button>
-              <button
-                onClick={() => setTimeFilter("week")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  timeFilter === "week" ? "bg-white text-indigo-600" : "bg-indigo-700 text-white hover:bg-indigo-800"
-                }`}
-              >
-                This Week
-              </button>
-              <button
-                onClick={() => setTimeFilter("month")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  timeFilter === "month" ? "bg-white text-indigo-600" : "bg-indigo-700 text-white hover:bg-indigo-800"
-                }`}
-              >
-                This Month
-              </button>
-              <button
-                onClick={() => setTimeFilter("year")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  timeFilter === "year" ? "bg-white text-indigo-600" : "bg-indigo-700 text-white hover:bg-indigo-800"
-                }`}
-              >
-                This Year
-              </button>
+              {["all", "week", "month", "year"].map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setTimeFilter(filter)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    timeFilter === filter
+                      ? "bg-white text-indigo-600"
+                      : "bg-indigo-700 text-white hover:bg-indigo-800"
+                  }`}
+                >
+                  {filter === "all"
+                    ? "All Time"
+                    : filter === "week"
+                    ? "This Week"
+                    : filter === "month"
+                    ? "This Month"
+                    : "This Year"}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Filter and refresh controls */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center">
               <Filter className="w-5 h-5 text-gray-500 mr-2" />
@@ -129,7 +124,6 @@ const PopularPage = () => {
             </button>
           </div>
 
-          {/* Content area */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             {loading ? (
               <div className="flex flex-col justify-center items-center py-16">
@@ -139,8 +133,42 @@ const PopularPage = () => {
                 </div>
                 <p className="mt-4 text-gray-500 text-lg">Loading popular posts...</p>
               </div>
-            ) : filteredBlogs.length > 0 ? (
-              <BlogList blogs={filteredBlogs} setBlogs={setBlogs} />
+            ) : currentBlogs.length > 0 ? (
+              <>
+                <BlogList blogs={currentBlogs} setBlogs={setBlogs} />
+
+                {totalPages > 1 && (
+                  <div className="flex justify-center mt-6 space-x-2">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1 rounded border-white text-sm bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    {[...Array(totalPages)].map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentPage(idx + 1)}
+                        className={`px-3 py-1 rounded border text-sm ${
+                          currentPage === idx + 1
+                            ? "text-blue-500 border-white bg-white"
+                            : "bg-white text-gray-700 border-white hover:bg-gray-100"
+                        }`}
+                      >
+                        {idx + 1}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-1 border-white border text-sm bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
