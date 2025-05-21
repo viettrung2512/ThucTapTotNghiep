@@ -1,42 +1,67 @@
+import { motion } from "framer-motion";
+
 const About = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-3xl text-left ">
-        <h1 className="text-4xl text-center font-bold text-blue-500 mb-6 mt-10">About SocialBlog</h1>
-        
-        <p className="text-lg text-black mb-8">
-          Welcome to <span className="font-bold">SocialBlog</span> — a place where stories connect us. We believe that everyone has a voice, and through SocialBlog, you can share your journey, opinions, and passions with a growing community of like-minded individuals.
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col items-center justify-center p-4 md:p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 max-w-4xl w-full text-left"
+      >
+        <h1 className="text-4xl md:text-5xl font-extrabold text-center text-blue-600 mb-8">
+          About SocialBlog
+        </h1>
+
+        <p className="text-lg md:text-xl text-gray-700 mb-10 leading-relaxed">
+          Welcome to <span className="font-bold text-blue-600">SocialBlog</span> — a vibrant platform where stories unite us. We believe everyone has a unique voice, and through SocialBlog, you can share your journey, ideas, and passions with a thriving community of creators and readers.
         </p>
 
-        <h2 className="text-2xl font-semibold text-blue-500 mb-4">Our Mission</h2>
-        <p className="text-md text-black mb-6">
-          Our mission is to create a space for meaningful conversations, where people can share personal experiences, creative ideas, and inspire others. Whether you’re an aspiring writer, a passionate creator, or just someone looking to connect, SocialBlog is the platform for you.
-        </p>
+        <div className="space-y-12">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-semibold text-blue-600 mb-4">Our Mission</h2>
+            <p className="text-md md:text-lg text-gray-600 leading-relaxed">
+              Our mission is to foster meaningful conversations by providing a space where people can share personal experiences, creative ideas, and inspire one another. Whether you’re an aspiring writer, a passionate creator, or someone seeking connection, SocialBlog is your platform.
+            </p>
+          </div>
 
-        <h2 className="text-2xl font-semibold text-blue-500 mb-4">What We Offer</h2>
-        <p className="text-md text-black mb-6">
-          SocialBlog provides a simple and intuitive way to write and publish your thoughts, connect with a diverse community, and engage with content that matters. Here, you can:
-        </p>
-        <ul className="list-disc list-inside text-left text-md text-black mb-8">
-          <li>Create and share blog posts on topics you’re passionate about.</li>
-          <li>Follow and interact with other users’ stories and discussions.</li>
-          <li>Engage in meaningful conversations and build lasting connections.</li>
-        </ul>
+          <div>
+            <h2 className="text-2xl md:text-3xl font-semibold text-blue-600 mb-4">What We Offer</h2>
+            <p className="text-md md:text-lg text-gray-600 mb-4 leading-relaxed">
+              SocialBlog empowers you to write, connect, and engage with content that matters. Here’s what you can do:
+            </p>
+            <ul className="list-disc list-inside text-md md:text-lg text-gray-600 space-y-2">
+              <li>Create and share blog posts on topics you’re passionate about.</li>
+              <li>Follow and interact with other users’ stories and discussions.</li>
+              <li>Engage in meaningful conversations and build lasting connections.</li>
+            </ul>
+          </div>
 
-        <h2 className="text-2xl font-semibold text-blue-500 mb-4">Why Join Us?</h2>
-        <p className="text-md text-black mb-6">
-          At SocialBlog, we believe in the power of community and authentic connection. By joining, you’ll be part of a platform that celebrates diversity of thought and fosters collaboration. Share your unique perspective and inspire others through the art of storytelling.
-        </p>
+          <div>
+            <h2 className="text-2xl md:text-3xl font-semibold text-blue-600 mb-4">Why Join Us?</h2>
+            <p className="text-md md:text-lg text-gray-600 leading-relaxed">
+              At SocialBlog, we celebrate the power of community and authentic storytelling. By joining, you’ll be part of a platform that values diverse perspectives and fosters collaboration. Share your unique voice and inspire others.
+            </p>
+          </div>
 
-        <h2 className="text-2xl font-semibold text-blue-500 mb-4">Be Part of Our Community</h2>
-        <p className="text-md text-black mb-8">
-          Thank you for being here! Whether you’re here to write, read, or simply explore, we hope you find value and connection through SocialBlog. Join us today and become part of a growing community that is shaping the future of digital conversations.
-        </p>
+          <div>
+            <h2 className="text-2xl md:text-3xl font-semibold text-blue-600 mb-4">Be Part of Our Community</h2>
+            <p className="text-md md:text-lg text-gray-600 mb-8 leading-relaxed">
+              Thank you for being here! Whether you’re here to write, read, or explore, we hope you find inspiration and connection through SocialBlog. Join us today and help shape the future of digital storytelling.
+            </p>
+          </div>
+        </div>
 
-        <button className="bg-blue-500 text-black px-6 py-3 rounded-lg hover:bg-blue-600">
-          Join the Community
-        </button>
-      </div>
+        <div className="text-center">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 transition-all duration-300 shadow-md"
+          >
+            Join the Community
+          </motion.button>
+        </div>
+      </motion.div>
     </div>
   );
 };
