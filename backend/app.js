@@ -28,10 +28,12 @@ const helmet = require('helmet');
 const compression = require('compression');
 const app = express();
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.CLIENT_URL 
-    : 'http://localhost:3000',
-  credentials: true
+  origin: [
+    'https://your-deployed-frontend-domain.com', 
+    'http://localhost:3000' 
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
 connectDB();
 app.use(helmet());
