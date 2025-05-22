@@ -59,6 +59,33 @@ const BlogContent = () => {
     fetchBlogData();
   }, [id, navigate]);
 
+useEffect(() => {
+  let hasSaved = false;
+  const saveHistory = async () => {
+    if (hasSaved) return;
+    hasSaved = true;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      await fetch("http://localhost:8080/api/history/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          postId: id, 
+          description: "Viewed the post",
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to save history:", error);
+    }
+  };
+
+  saveHistory();
+}, [id]); 
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);

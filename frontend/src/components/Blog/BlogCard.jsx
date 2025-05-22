@@ -8,6 +8,7 @@ const BlogCard = ({ blog, category, title, imageUrl }) => {
     navigate(`/blog/${blog._id}`); 
   };
 
+  
   return (
     <div
       onClick={handleNavigation}

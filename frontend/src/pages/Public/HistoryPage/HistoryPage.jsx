@@ -1,57 +1,61 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { useState } from "react";
-import  NavBar  from "../../../components/Header/NavBar";
-import  SideBar  from "../../../components/Sidebar/SideBar";
+import { useState, useEffect } from "react";
+import NavBar from "../../../components/Header/NavBar";
+import SideBar from "../../../components/Sidebar/SideBar";
 
-const blogs = [
-  {
-    id: 1,
-    title: "Blog 1",
-    desc: "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
-    coverImg:
-      "https://mir-s3-cdn-cf.behance.net/project_modules/fs/876c22100707927.5f0ec9851cb08.png",
-    readTime: "1m read time",
-    upvotes: "226 upvotes",
-    date: "Wed, 30 Oct",
-  },
-  {
-    id: 2,
-    title: "Blog 2",
-    desc: "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
-    coverImg:
-      "https://mir-s3-cdn-cf.behance.net/project_modules/fs/876c22100707927.5f0ec9851cb08.png",
-    upvotes: "89 upvotes",
-    date: "Wed, 23 Oct",
-  },
-  {
-    id: 3,
-    title: "Blog 3",
-    desc: "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
-    coverImg:
-      "https://mir-s3-cdn-cf.behance.net/project_modules/fs/876c22100707927.5f0ec9851cb08.png",
-    readTime: "7m read time",
-    upvotes: "811 upvotes",
-    date: "Wed, 23 Oct",
-  },
-];
+const HistoryPage = () => {
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const ReadingHistory = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
+  
+  
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Bạn cần đăng nhập để xem lịch sử.");
+        setLoading(false);
+        return;
+      }
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
+      try {
+        const response = await fetch("http://localhost:8080/api/history", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    navigate(`/search?query=${searchTerm}`);
-    setSearchTerm("");
-  };
+        if (!response.ok) {
+          const data = await response.text();
+          console.error("Error Response:", data); // Log lỗi chi tiết
+          throw new Error(data || "Lỗi khi tải lịch sử.");
+        }
+
+        const data = await response.json();
+        setHistory(data.data.history);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, []);
+
+
+  if (loading) {
+    return <div className="text-center mt-10">Đang tải...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-10 text-red-500">{error}</div>;
+  }
 
   return (
-    <div className="bg-white min-h-screen text-black"> 
+    <div className="bg-white min-h-screen text-black">
       <header>
         <NavBar />
       </header>
@@ -60,29 +64,35 @@ const ReadingHistory = () => {
           <SideBar />
         </div>
         <div className="flex-grow p-4 ml-4">
-          <h2 className="text-lg font-semibold mb-5 mt-20">Reading history</h2>
-          <div className="flex items-center mb-2">
-            <form
-              onSubmit={handleSearchSubmit}
-              className="border hidden md:flex items-center"            >
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  placeholder="Search blog..."
-                  className="bg-white rounded px-4 py-2 pl-10 pr-4" 
-                />
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-
-                </span>
-              </div>
-            </form>
-          </div>
+          <h2 className="text-lg font-semibold mb-5 mt-20">Lịch sử đọc</h2>
           <div className="mt-4">
-            {blogs.map((blog) => (
-              <HistoryItem key={blog.id} blog={blog} />
-            ))}
+            {history.length > 0 ? (
+              history.map((item) => (
+                <div key={item._id} className="border-b border-gray-700 mb-4 pb-2">
+                  <div className="flex items-center">
+                    <img
+                      src={item.details?.postId?.imageCloudUrl || ""}
+                      alt="Article Thumbnail"
+                      className="w-20 h-20 rounded-lg mr-2"
+                    />
+                    <div>
+                      <Link to={`/blog/${item.details?.postId?._id}`}>
+                        <h3 className="text-md font-medium text-blue-400 hover:underline">
+                          {item.details?.postId?.title || "Bài viết không tồn tại"}
+                        </h3>
+                      </Link>
+                      <span className="text-sm text-gray-400">
+                        {new Date(item.timestamp).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500">
+                Không có lịch sử đọc nào.
+              </div>
+            )}
           </div>
         </div>
       </main>
@@ -90,22 +100,22 @@ const ReadingHistory = () => {
   );
 };
 
-const HistoryItem = ({ blog }) => (
+const HistoryItem = ({ history }) => (
   <div className="border-b border-gray-700 mb-4 pb-2">
     <div className="flex items-center">
       <img
-        src={blog.coverImg}
+        src={history.details?.postId?.imageCloudUrl || ""}
         alt="Article Thumbnail"
         className="w-20 h-20 rounded-lg mr-2"
       />
       <div>
-        <Link to={`/blog/${blog.id}`}>
+        <Link to={`/blog/${history.details?.postId?._id}`}>
           <h3 className="text-md font-medium text-blue-400 hover:underline">
-            {blog.title}
+            {history.details?.postId?.title || "Bài viết không tồn tại"}
           </h3>
         </Link>
         <span className="text-sm text-gray-400">
-          {blog.readTime ? `${blog.readTime}  ` : ""}
+          {new Date(history.timestamp).toLocaleString()}
         </span>
       </div>
     </div>
@@ -113,15 +123,19 @@ const HistoryItem = ({ blog }) => (
 );
 
 HistoryItem.propTypes = {
-  blog: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    desc: PropTypes.string.isRequired,
-    coverImg: PropTypes.string.isRequired,
-    readTime: PropTypes.string,
-    upvotes: PropTypes.string,
-    date: PropTypes.string,
+  history: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    details: PropTypes.shape({
+      postId: PropTypes.shape({
+        _id: PropTypes.string,
+        title: PropTypes.string,
+        imageCloudUrl: PropTypes.string,
+      }), 
+    }),
+    timestamp: PropTypes.string.isRequired,
   }).isRequired,
 };
 
-export default ReadingHistory;
+export default HistoryPage;
+
+

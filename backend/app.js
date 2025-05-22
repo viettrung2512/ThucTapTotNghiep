@@ -24,6 +24,7 @@ var audioRouter = require('./routes/audio');
 var perspectiveRouter = require('./routes/perspective');
 var adminRouter = require('./controllers/adminController');
 var reportItemRouter = require('./routes/reportItem');
+const historyRoutes = require('./routes/history');
 
 var app = express();
 app.use(cors());
@@ -57,6 +58,12 @@ app.use('/api/audio', audioRouter);
 app.use('/api/perspective', perspectiveRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/report-items', reportItemRouter);
+app.use('/api/history', historyRoutes);
+
+app.use((req, res, next) => {
+  res.status(404).send('Not Found');
+  
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
