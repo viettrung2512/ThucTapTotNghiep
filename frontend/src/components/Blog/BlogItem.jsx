@@ -3,13 +3,20 @@ import PropTypes from "prop-types";
 import SaveButton from "../Button/SaveButton";
 import LikeButton from "../Button/LikeButton";
 import { useState } from "react";
+import { useEffect } from "react";
 
 const BlogItem = ({ blog, setBlogs }) => {
   const navigate = useNavigate();
 
   const [likes, setLikes] = useState(blog.likeCnt || 0);
-  const [isLiked, setIsLiked] = useState(blog.liked || false);
-  const [isSaved, setIsSaved] = useState(blog.saved || false);
+  const [isLiked, setIsLiked] = useState(blog.liked ?? false);
+  const [isSaved, setIsSaved] = useState(blog.saved ?? false);
+
+  useEffect(() => {
+    setIsLiked(blog.liked);
+    setIsSaved(blog.saved);
+    setLikes(blog.likeCnt);
+  }, [blog.liked, blog.saved, blog.likeCnt]);
 
   const handleNavigate = () => {
     navigate(`/blog/${blog._id}`);
@@ -100,8 +107,8 @@ BlogItem.propTypes = {
     category: PropTypes.string,
     imageCloudUrl: PropTypes.string,
     likeCnt: PropTypes.number,
-    liked: PropTypes.bool,
-    saved: PropTypes.bool,
+    liked: PropTypes.boolean,
+    saved: PropTypes.boolean,
     author: PropTypes.shape({
       id: PropTypes.string,
       name: PropTypes.string,

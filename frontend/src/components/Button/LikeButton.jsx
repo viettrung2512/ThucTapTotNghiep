@@ -1,62 +1,91 @@
-import { FaHeart } from 'react-icons/fa';
-import PropTypes from 'prop-types';
+import { FaHeart } from "react-icons/fa";
+import PropTypes from "prop-types";
+import { useState } from "react";
 
-const LikeButton = ({ blogId, likes, isLiked, setLikes, setIsLiked, setBlogs }) => {
-	const token = localStorage.getItem('token');
+const LikeButton = ({
+  blogId,
+  likes: initialLikes,
+  isLiked: initialIsLiked,
+  setBlogs,
+}) => {
+  const token = localStorage.getItem("token");
+  const [isLiked, setIsLiked] = useState(initialIsLiked);
+  const [likes, setLikes] = useState(initialLikes);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-	const handleToggleLike = async (e) => {
-		e.stopPropagation();
+  const handleToggleLike = async (e) => {
+    e.stopPropagation();
 
-		if (!token) {
-			alert('Bạn cần đăng nhập.');
-			return;
-		}
+    if (!token) {
+      alert("Bạn cần đăng nhập.");
+      return;
+    }
 
-		const url = `http://localhost:8080/api/likes/post/${blogId}`;
-		const method = isLiked ? 'DELETE' : 'POST';
+    if (isProcessing) return;
 
-		try {
-			const response = await fetch(url, {
-				method,
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
+    const url = `http://localhost:8080/api/likes/post/${blogId}`;
+    const method = isLiked ? "DELETE" : "POST";
 
-			if (!response.ok) {
-				const data = await response.json();
-				alert(data.message || 'Lỗi khi like/unlike bài viết');
-				return;
-			}
+    try {
+      setIsProcessing(true);
+      
+      // Optimistic update
+      const newIsLiked = !isLiked;
+      const newLikes = newIsLiked ? likes + 1 : likes - 1;
+      
+      setIsLiked(newIsLiked);
+      setLikes(newLikes);
 
-			const newLikes = isLiked ? likes - 1 : likes + 1;
-			setLikes(newLikes);
-			setIsLiked(!isLiked);
+      // Gọi API
+      const response = await fetch(url, {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-			setBlogs((prevBlogs) => prevBlogs.map((blog) => (blog._id === blogId ? { ...blog, likeCnt: newLikes, liked: !isLiked } : blog)));
-		} catch (error) {
-			console.error('Lỗi khi like/unlike:', error);
-		}
-	};
+      if (!response.ok) {
+        throw new Error("Lỗi API");
+      }
 
-	return (
-		<div
-			onClick={handleToggleLike}
-			className={`like-icon-container flex items-center space-x-1 cursor-pointer ${isLiked ? 'text-red-500' : 'hover:text-red-500'}`}
-		>
-			<FaHeart style={{ fill: 'currentColor' }} />
-			<span>{likes}</span>
-		</div>
-	);
+      // Cập nhật danh sách blog tổng thể
+      if (setBlogs) {
+        setBlogs(prevBlogs =>
+          prevBlogs.map(blog =>
+            blog._id === blogId
+              ? { ...blog, likeCnt: newLikes, liked: newIsLiked }
+              : blog
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi khi like/unlike:", error);
+      // Revert state nếu có lỗi
+      setIsLiked(initialIsLiked);
+      setLikes(initialLikes);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div
+      onClick={handleToggleLike}
+      className={`like-icon-container flex items-center space-x-1 cursor-pointer ${
+        isLiked ? "text-red-500" : "text-gray-500 hover:text-red-500"
+      } ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
+    >
+      <FaHeart style={{ fill: "currentColor" }} />
+      <span>{likes}</span>
+    </div>
+  );
 };
 
 LikeButton.propTypes = {
-	blogId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-	likes: PropTypes.number.isRequired,
-	isLiked: PropTypes.bool.isRequired,
-	setLikes: PropTypes.func.isRequired,
-	setIsLiked: PropTypes.func.isRequired,
-	setBlogs: PropTypes.func.isRequired,
+  blogId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  likes: PropTypes.number.isRequired,
+  isLiked: PropTypes.bool.isRequired,
+  setBlogs: PropTypes.func,
 };
 
 export default LikeButton;

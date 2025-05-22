@@ -27,10 +27,10 @@ const likePost = async (postId, userId) => {
     const updatedPost = await Post.findByIdAndUpdate(
       postId,
       {
-        $push: { likes: like }, // Thêm like vào mảng likes
+        $push: { likes: like._id }, // Thêm like vào mảng likes
       },
       { new: true, runValidators: true } // Trả về bài viết đã cập nhật và kiểm tra validation
-    );
+    ).populate("likes");
   
     if (!updatedPost) {
       throw new Error('Post not found');

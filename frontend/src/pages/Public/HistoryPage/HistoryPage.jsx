@@ -47,7 +47,7 @@ const HistoryPage = () => {
 
 
   if (loading) {
-    return <div className="text-center mt-10">Đang tải...</div>;
+    return <div className="text-center mt-10">Loading...</div>;
   }
 
   if (error) {
@@ -64,7 +64,7 @@ const HistoryPage = () => {
           <SideBar />
         </div>
         <div className="flex-grow p-4 ml-4">
-          <h2 className="text-lg font-semibold mb-5 mt-20">Lịch sử đọc</h2>
+          <h2 className="text-lg font-semibold mb-5 mt-20">History</h2>
           <div className="mt-4">
             {history.length > 0 ? (
               history.map((item) => (
@@ -90,7 +90,7 @@ const HistoryPage = () => {
               ))
             ) : (
               <div className="text-center text-gray-500">
-                Không có lịch sử đọc nào.
+                No history found.
               </div>
             )}
           </div>

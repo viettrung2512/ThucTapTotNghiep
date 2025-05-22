@@ -25,7 +25,7 @@ const Homepage = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/posts${userId ? `?userId=${userId}` : ''}`,
+        `http://localhost:8080/api/posts?userId=${userId}`, 
         {
           method: "GET",
           headers: {
