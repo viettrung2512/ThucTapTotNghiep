@@ -59,11 +59,11 @@ app.use('/api/report-items', reportItemRouter);
 app.use('/api/history', historyRoutes);
 
 // Serve React build
-app.use(express.static(path.join(__dirname, '../frontend/build')));
+app.use(express.static(path.join(__dirname, '../frontend/src')));
 
 // Serve React frontend for non-API routes
 app.get(/^\/(?!api).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+  res.sendFile(path.join(__dirname, '../frontend/src'));
 });
 
 // Error Handlers
