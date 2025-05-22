@@ -29,11 +29,11 @@ const compression = require('compression');
 const app = express();
 app.use(cors({
   origin: [
-    'https://your-deployed-frontend-domain.com', 
-    'http://localhost:3000' 
+    'http://localhost:5173', // Frontend URL
+    'https://accounts.google.com'
   ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE']
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
 }));
 connectDB();
 app.use(helmet());
@@ -43,7 +43,17 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self';" +
+    "connect-src 'self' http://localhost:8080 https://accounts.google.com;" +
+    "script-src 'self' 'unsafe-inline' https://accounts.google.com;" +
+    "style-src 'self' 'unsafe-inline';" +
+    "img-src 'self' data:;"
+  );
+  next();
+});
 // Static for public folder
 app.use(express.static(path.join(__dirname, 'public')));
 

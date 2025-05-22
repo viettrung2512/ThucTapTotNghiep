@@ -94,7 +94,7 @@ AdminRoute.propTypes = {
 
 const App = () => {
   return (
-    <GoogleOAuthProvider clientId="676959420577-hjks9prgmq21oouea14iqf3heej9k0ic.apps.googleusercontent.com"> 
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <ToastContainer />
       <Routes>
         <Route path="/" element={<Homepage />} />
