@@ -36,7 +36,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// Static for public folder (optional)
+// Static for public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 // API ROUTES
@@ -61,21 +61,24 @@ app.use('/api/history', historyRoutes);
 // Serve React build
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-// Serve frontend for non-API routes
+// Serve React frontend for non-API routes
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
 });
 
 // Error Handlers
+
+// 404 Not Found
 app.use((req, res, next) => {
-  next(createError(404));
+  res.status(404).json({ message: 'Not Found' });
 });
 
+// General error handler
 app.use((err, req, res, next) => {
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-  res.status(err.status || 500);
-  res.render('error');
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    error: req.app.get('env') === 'development' ? err : {}
+  });
 });
 
 // Start server
