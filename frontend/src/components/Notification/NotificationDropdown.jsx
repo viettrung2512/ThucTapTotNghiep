@@ -31,7 +31,7 @@ const NotificationDropdown = () => {
   const fetchNotifications = async () => {
     const token = localStorage.getItem("token")
     try {
-      const response = await fetch(`http://localhost:8080/api/notifications`, {
+      const response = await fetch(`/api/notifications`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +73,7 @@ const NotificationDropdown = () => {
   const markAsRead = async (id) => {
     const token = localStorage.getItem("token")
     try {
-      const response = await fetch(`http://localhost:8080/api/notifications/${id}/read`, {
+      const response = await fetch(`/api/notifications/${id}/read`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -101,7 +101,7 @@ const NotificationDropdown = () => {
   const markAllAsRead = async () => {
     const token = localStorage.getItem("token")
     try {
-      const response = await fetch(`http://localhost:8080/api/notifications/read-all`, {
+      const response = await fetch(`/api/notifications/read-all`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

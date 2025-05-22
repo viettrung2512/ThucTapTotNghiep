@@ -27,7 +27,7 @@ const BlogContent = () => {
       const token = localStorage.getItem("token");
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:8080/api/posts/${id}`, {
+        const response = await fetch(`/api/posts/${id}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -68,7 +68,7 @@ useEffect(() => {
     if (!token) return;
 
     try {
-      await fetch("http://localhost:8080/api/history/add", {
+      await fetch("/api/history/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

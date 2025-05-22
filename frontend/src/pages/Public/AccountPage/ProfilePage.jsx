@@ -44,7 +44,7 @@ const ProfilePage = () => {
     const fetchUserInfo = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/users/${userId}`,
+          `/api/users/${userId}`,
           {
             method: "GET",
             headers: {
@@ -69,7 +69,7 @@ const ProfilePage = () => {
     const fetchMyPosts = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/posts/${userId}-posts`,
+          `/api/posts/${userId}-posts`,
           {
             method: "GET",
             headers: {
@@ -105,7 +105,7 @@ const ProfilePage = () => {
     setModalLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/follows/${userId}/followers`,
+        `/api/follows/${userId}/followers`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -132,7 +132,7 @@ const ProfilePage = () => {
     setModalLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/follows/${userId}/following`,
+        `/api/follows/${userId}/following`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

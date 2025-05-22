@@ -25,7 +25,7 @@ const Homepage = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/posts?userId=${userId}`, 
+        `/api/posts?userId=${userId}`, 
         {
           method: "GET",
           headers: {
@@ -58,7 +58,7 @@ const Homepage = () => {
 
     try {
       const mostLikedResponse = await fetch(
-        `http://localhost:8080/api/posts/most-liked${userId ? `?userId=${userId}` : ''}`,
+        `/api/posts/most-liked${userId ? `?userId=${userId}` : ''}`,
         {
           method: "GET",
           headers: {

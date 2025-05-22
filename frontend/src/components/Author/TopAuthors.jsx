@@ -12,7 +12,7 @@ const TopAuthors = () => {
     const token = localStorage.getItem("token");
     const fetchTopAuthors = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/users/most-posts", {
+        const response = await fetch("/api/users/most-posts", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -25,7 +25,7 @@ const TopAuthors = () => {
         const topAuthors = await Promise.all(
           data.slice(0, 4).map(async (author) => {
             const followersResponse = await fetch(
-              `http://localhost:8080/api/follows/${author.id}/followers`
+              `/api/follows/${author.id}/followers`
             );
             const followersData = await followersResponse.json();
             return {

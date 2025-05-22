@@ -12,7 +12,7 @@ const SaveButton = ({ blog, setBlogs, isSaved, setIsSaved }) => {
       return;
     }
 
-    const url = `http://localhost:8080/bookmarks/post/${blog._id}`;
+    const url = `/bookmarks/post/${blog._id}`;
     const method = isSaved ? "DELETE" : "POST";
 
     try {

@@ -10,7 +10,7 @@ const CategoriesPage = () => {
 
   useEffect(() => {
     // Fetch categories from the API
-    fetch("http://localhost:8080/api/posts")
+    fetch("/api/posts")
       .then((response) => response.json())
       .then((data) => {
         // Lấy danh sách category từ các bài blog

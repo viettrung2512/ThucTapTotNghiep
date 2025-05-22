@@ -24,7 +24,7 @@ const SavedBlogsPage = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:8080/bookmarks`, {
+        const response = await fetch(`/bookmarks`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

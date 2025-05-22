@@ -43,7 +43,7 @@ const Home = () => {
     // Fetch blogs
     const fetchBlogs = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/posts");
+        const response = await fetch("/api/posts");
         const data = await response.json();
         setBlogsCount(data.content.length);
 
@@ -106,7 +106,7 @@ const Home = () => {
       return;
     }
 
-    fetch("http://localhost:8080/api/admin/users", {
+    fetch("/api/admin/users", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

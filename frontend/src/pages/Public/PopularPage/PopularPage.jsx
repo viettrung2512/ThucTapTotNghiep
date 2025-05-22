@@ -18,7 +18,7 @@ const PopularPage = () => {
     try {
       setLoading(true)
       const response = await fetch(
-        `http://localhost:8080/api/posts/most-liked${timeFilter !== "all" ? `?period=${timeFilter}` : ""}`,
+        `/api/posts/most-liked${timeFilter !== "all" ? `?period=${timeFilter}` : ""}`,
         {
           method: "GET",
           headers: {

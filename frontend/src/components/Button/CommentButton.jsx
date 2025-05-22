@@ -21,7 +21,7 @@ const CommentButton = ({ blogId }) => {
     const fetchComments = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await fetch(`http://localhost:8080/api/comments/${blogId}`, {
+        const response = await fetch(`/api/comments/${blogId}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ const CommentButton = ({ blogId }) => {
     if (commentText.trim()) {
       const newComment = { content: commentText };
       try {
-        const response = await fetch(`http://localhost:8080/api/comments/${blogId}`, {
+        const response = await fetch(`/api/comments/${blogId}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -94,7 +94,7 @@ const CommentButton = ({ blogId }) => {
       return;
     }
 
-    const url = `http://localhost:8080/api/likes/comment/${commentId}`;
+    const url = `/api/likes/comment/${commentId}`;
     const method = isLiked ? "DELETE" : "POST";
 
     try {
@@ -127,7 +127,7 @@ const CommentButton = ({ blogId }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/comments/${commentId}`, {
+      const response = await fetch(`/api/comments/${commentId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

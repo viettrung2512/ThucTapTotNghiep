@@ -21,7 +21,7 @@ const HistoryPage = () => {
       }
 
       try {
-        const response = await fetch("http://localhost:8080/api/history", {
+        const response = await fetch("/api/history", {
           headers: {
             Authorization: `Bearer ${token}`,
           },

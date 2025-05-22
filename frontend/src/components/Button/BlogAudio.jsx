@@ -9,7 +9,7 @@ const BlogAudio = ({ blogText }) => {
   const generateAudio = async () => {
     setIsGenerating(true); 
     try {
-      const response = await fetch("http://localhost:8080/api/audio/generate", {
+      const response = await fetch("/api/audio/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

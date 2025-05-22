@@ -21,7 +21,7 @@ function SearchResults() {
       if (prevSearchTerm.current !== searchTerm) {
         setIsLoading(true);
         const response = await fetch(
-          `http://localhost:8080/api/posts/search?keyword=${searchTerm}`
+          `/api/posts/search?keyword=${searchTerm}`
         );
         const data = await response.json();
         setResults(data);

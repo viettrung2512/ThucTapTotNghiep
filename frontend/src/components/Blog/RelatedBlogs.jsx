@@ -11,7 +11,7 @@ const RelatedBlogs = ({ tag, postId }) => {
       const token = localStorage.getItem("token");
       try {
         const response = await fetch(
-          `http://localhost:8080/api/posts/related/${tag}/${postId}`,
+          `/api/posts/related/${tag}/${postId}`,
           {
             method: "GET",
             headers: {

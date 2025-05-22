@@ -29,7 +29,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:8080/login`, {
+      const response = await fetch(`/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -71,7 +71,7 @@ const Login = () => {
     const token = credentialResponse.credential;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/auth/google`, {
+      const response = await fetch(`/api/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),

@@ -8,7 +8,7 @@ const TagList = () => {
   const [blogs, setBlogs] = useState([]);
   const [isLoading, setIsLoading] = useState(true); 
   useEffect(() => {
-    fetch("http://localhost:8080/api/posts")
+    fetch("/api/posts")
       .then((response) => response.json())
       .then((data) => {
         const filteredBlogs = data.content.filter(

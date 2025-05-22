@@ -27,7 +27,7 @@ const BlogPage = () => {
 
   // Fetch blogs when the component mounts
   useEffect(() => {
-    fetch("http://localhost:8080/api/posts")
+    fetch("/api/posts")
       .then((response) => response.json())
       .then((data) => {
         const formattedBlogs = data.content.map((blog) => ({
@@ -41,7 +41,7 @@ const BlogPage = () => {
 
   const handleDeleteBlog = (id) => {
     const token = localStorage.getItem("token");
-    fetch(`http://localhost:8080/api/posts/${id}`, {
+    fetch(`/api/posts/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -81,7 +81,7 @@ const BlogPage = () => {
     const token = localStorage.getItem("token");
 
     if (isEditing) {
-      fetch(`http://localhost:8080/api/posts/${currentBlog.id}`, {
+      fetch(`/api/posts/${currentBlog.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -104,7 +104,7 @@ const BlogPage = () => {
         });
     } else {
       // Thêm blog mới (nếu cần)
-      fetch("http://localhost:8080/api/posts", {
+      fetch("/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

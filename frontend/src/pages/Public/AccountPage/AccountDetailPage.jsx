@@ -42,7 +42,7 @@ const AccountDetailPage = () => {
 
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/users/me", {
+        const response = await fetch("/api/users/me", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -123,7 +123,7 @@ const AccountDetailPage = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/users", {
+      const response = await fetch("/api/users", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

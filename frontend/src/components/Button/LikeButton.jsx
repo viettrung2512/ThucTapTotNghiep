@@ -23,7 +23,7 @@ const LikeButton = ({
 
     if (isProcessing) return;
 
-    const url = `http://localhost:8080/api/likes/post/${blogId}`;
+    const url = `/api/likes/post/${blogId}`;
     const method = isLiked ? "DELETE" : "POST";
 
     try {

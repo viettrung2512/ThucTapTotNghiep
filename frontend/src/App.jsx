@@ -91,10 +91,24 @@ const AdminRoute = ({ children }) => {
 AdminRoute.propTypes = {
   children: PropTypes.node.isRequired,
 };
+const GoogleAuthStyle = () => {
+  useEffect(() => {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = import.meta.env.VITE_GOOGLE_STYLE_URL
+    document.head.appendChild(link)
+    
+    return () => {
+      document.head.removeChild(link)
+    }
+  }, [])
 
+  return null
+}
 const App = () => {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <GoogleAuthStyle />
       <ToastContainer />
       <Routes>
         <Route path="/" element={<Homepage />} />

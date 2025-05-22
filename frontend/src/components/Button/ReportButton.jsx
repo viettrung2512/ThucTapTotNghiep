@@ -7,7 +7,7 @@ const ReportButton = ({ reportText, type, id, message }) => {
   const reportContent = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch("http://localhost:8080/api/perspective/analyze", {
+      const response = await fetch("/api/perspective/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

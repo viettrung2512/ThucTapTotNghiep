@@ -15,7 +15,7 @@ const FollowButton = ({ userId, isFollowing, setIsFollowing, onFollowChange }) =
             return;
         }
 
-        const url = `http://localhost:8080/api/follows/${userId}`;
+        const url = `/api/follows/${userId}`;
         const method = isFollowing ? "DELETE" : "POST";
 
         try {

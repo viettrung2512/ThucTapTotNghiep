@@ -9,7 +9,7 @@ const Blogs = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/posts", {
+        const response = await fetch("/api/posts", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

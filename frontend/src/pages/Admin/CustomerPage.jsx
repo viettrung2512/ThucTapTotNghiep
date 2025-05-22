@@ -18,7 +18,7 @@ const CustomerPage = () => {
     const fetchCustomers = async () => {
       const token = localStorage.getItem("token"); // Lấy token từ localStorage
       try {
-        const response = await fetch("http://localhost:8080/api/admin/users", {
+        const response = await fetch("/api/admin/users", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -54,7 +54,7 @@ const CustomerPage = () => {
   const handleDeleteCustomer = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/admin/users/${id}`,
+        `/api/admin/users/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -79,7 +79,7 @@ const CustomerPage = () => {
     if (isEditing) {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/admin/users/${currentCustomer.id}`,
+          `/api/admin/users/${currentCustomer.id}`,
           {
             method: "PUT",
             headers: {
@@ -106,7 +106,7 @@ const CustomerPage = () => {
       }
     } else {
       try {
-        const response = await fetch("http://localhost:8080/api/admin/users", {
+        const response = await fetch("/api/admin/users", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
