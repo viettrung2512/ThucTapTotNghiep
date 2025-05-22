@@ -24,12 +24,18 @@ const perspectiveRouter = require('./routes/perspective');
 const adminRouter = require('./controllers/adminController');
 const reportItemRouter = require('./routes/reportItem');
 const historyRoutes = require('./routes/history');
-
+const helmet = require('helmet');
+const compression = require('compression');
 const app = express();
-app.use(cors());
-
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.CLIENT_URL 
+    : 'http://localhost:3000',
+  credentials: true
+}));
 connectDB();
-
+app.use(helmet());
+app.use(compression());
 // Middleware
 app.use(logger('dev'));
 app.use(express.json());
@@ -59,11 +65,11 @@ app.use('/api/report-items', reportItemRouter);
 app.use('/api/history', historyRoutes);
 
 // Serve React build
-app.use(express.static(path.join(__dirname, '../frontend/src/App.jsx')));
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Serve React frontend for non-API routes
 app.get(/^\/(?!api).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/src/App.jsx'));
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
 // Error Handlers
