@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { GoogleOAuthProvider } from "@react-oauth/google"; 
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import "react-toastify/dist/ReactToastify.css";
 
 import Header from "./pages/Admin/Header";
@@ -93,21 +93,25 @@ AdminRoute.propTypes = {
 };
 const GoogleAuthStyle = () => {
   useEffect(() => {
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.href = import.meta.env.VITE_GOOGLE_STYLE_URL
-    document.head.appendChild(link)
-    
-    return () => {
-      document.head.removeChild(link)
-    }
-  }, [])
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = import.meta.env.VITE_GOOGLE_STYLE_URL;
+    document.head.appendChild(link);
 
-  return null
-}
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
+
+  return null;
+};
 const App = () => {
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider
+      clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+      redirectUri={import.meta.env.VITE_GOOGLE_REDIRECT_URI}
+      onScriptLoadSuccess={() => console.log("Google OAuth loaded!")}
+    >
       <GoogleAuthStyle />
       <ToastContainer />
       <Routes>

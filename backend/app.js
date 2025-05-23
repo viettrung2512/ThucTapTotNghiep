@@ -29,10 +29,9 @@ const compression = require('compression');
 const app = express();
 app.use(cors({
   origin: [
-    'http://localhost:5173', // Frontend URL
+    'https://social-web-axbp.onrender.com',
     'https://accounts.google.com'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
 connectDB();
@@ -48,9 +47,10 @@ app.use((req, res, next) => {
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "img-src 'self' data: http://localhost:8080 https://res.cloudinary.com https://img.freepik.com",
-      "connect-src 'self' http://localhost:8080",
       "script-src 'self' 'unsafe-inline' https://accounts.google.com",
+      "connect-src 'self' https://social-web-backend.onrender.com https://accounts.google.com",
+      "frame-src 'self' https://accounts.google.com",
+      "img-src 'self' data: https://*.googleusercontent.com"
     ].join('; ')
   );
   next();
