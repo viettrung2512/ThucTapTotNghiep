@@ -95,7 +95,8 @@ const GoogleAuthStyle = () => {
   useEffect(() => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = import.meta.env.VITE_GOOGLE_STYLE_URL;
+    link.href = "https://accounts.google.com/gsi/style";
+    link.crossOrigin = "anonymous";
     document.head.appendChild(link);
 
     return () => {
@@ -109,8 +110,7 @@ const App = () => {
   return (
     <GoogleOAuthProvider
       clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
-      redirectUri={import.meta.env.VITE_GOOGLE_REDIRECT_URI}
-      onScriptLoadSuccess={() => console.log("Google OAuth loaded!")}
+      onScriptLoadSuccess={() => console.log("Google OAuth ready")}
     >
       <GoogleAuthStyle />
       <ToastContainer />
