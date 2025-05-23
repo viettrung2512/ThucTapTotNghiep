@@ -71,41 +71,67 @@ const Login = () => {
     const token = credentialResponse.credential;
 
     try {
-      const response = await fetch(`/api/auth/google`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-      });
+      // 1. Gọi API xác thực
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/auth/google`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include", // Quan trọng cho session/cookie
+          body: JSON.stringify({ token }),
+        }
+      );
 
+      // 2. Xử lý response
       if (!response.ok) {
-        throw new Error("Google login failed!");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Google login failed!");
       }
 
       const data = await response.json();
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("username", data.username);
-      localStorage.setItem("profilePicture", data.profilePicture);
-      localStorage.setItem("userId", data.id);
-      localStorage.setItem("userRole", data.userRole);
 
-      toast.success("Google login successful!", {
-        position: "top-right",
-        autoClose: 3000,
+      // 3. Lưu thông tin người dùng
+      const authData = {
+        token: data.token,
+        username: data.username,
+        profilePicture: data.profilePicture || "/default-avatar.png", // Fallback avatar
+        userId: data.id,
+        userRole: data.userRole || "USER", // Mặc định là USER nếu không có
+      };
+
+      // Lưu vào localStorage
+      Object.entries(authData).forEach(([key, value]) => {
+        localStorage.setItem(key, value);
       });
 
-      if (data.userRole === "ADMIN") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
+      // 4. Hiển thị thông báo và chuyển hướng
+      toast.success("Đăng nhập thành công!", {
+        position: "top-right",
+        autoClose: 2000,
+        onClose: () => {
+          // Chuyển hướng sau khi toast đóng
+          navigate(data.userRole === "ADMIN" ? "/admin" : "/", {
+            replace: true, // Ngăn quay lại trang login
+          });
+        },
+      });
     } catch (error) {
-      toast.error(error.message, {
+      console.error("Google login error:", error);
+
+      // Hiển thị lỗi chi tiết hơn
+      const errorMessage = error.message.includes("Failed to fetch")
+        ? "Lỗi kết nối đến server"
+        : error.message;
+
+      toast.error(errorMessage, {
         position: "top-right",
         autoClose: 3000,
       });
     }
   };
-
   return (
     <div>
       <section className="h-screen">
@@ -121,7 +147,9 @@ const Login = () => {
             <div className="xl:ml-20 xl:w-5/12 lg:w-5/12 md:w-8/12 mb-12 md:mb-0">
               <form onSubmit={handleLogin}>
                 <div className="mb-6">
-                  <label htmlFor="username" className="block mb-1 text-sm">Username</label>
+                  <label htmlFor="username" className="block mb-1 text-sm">
+                    Username
+                  </label>
                   <input
                     id="username"
                     type="text"
@@ -133,7 +161,9 @@ const Login = () => {
                   />
                 </div>
                 <div className="mb-6">
-                  <label htmlFor="password" className="block mb-1 text-sm">Password</label>
+                  <label htmlFor="password" className="block mb-1 text-sm">
+                    Password
+                  </label>
                   <input
                     id="password"
                     type="password"
