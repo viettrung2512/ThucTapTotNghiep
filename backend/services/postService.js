@@ -154,9 +154,7 @@ module.exports = {
       category,
       tags,
       content,
-      imageCloudUrl:
-        imageCloudUrl ||
-        "https://img.freepik.com/free-vector/hand-drawn-flat-design-digital-detox-illustration_23-2149332264.jpg",
+      imageCloudUrl: imageCloudUrl || "https://res.cloudinary.com/.../default-image.jpg",
       author: user._id,
       createdAt: new Date(),
     });

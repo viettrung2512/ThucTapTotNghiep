@@ -9,8 +9,28 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '') 
+      },
+      '/uploads': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
         secure: false
+      },
+      '/cloudinary': {
+        target: 'https://res.cloudinary.com',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/cloudinary/, '')
       }
     }
-  } 
+  },
+  build: {
+    assetsInlineLimit: 0,
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name].[hash].[ext]'
+      }
+    }
+  }
 })

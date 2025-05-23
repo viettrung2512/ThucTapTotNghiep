@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
+const path = require('path');
 const connectDB = require('./config/db');
 require('dotenv').config();
 
@@ -46,16 +47,16 @@ app.use(cookieParser());
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self';" +
-    "connect-src 'self' http://localhost:8080 https://accounts.google.com;" +
-    "script-src 'self' 'unsafe-inline' https://accounts.google.com;" +
-    "style-src 'self' 'unsafe-inline';" +
-    "img-src 'self' data:;"
+    [
+      "default-src 'self'",
+      "img-src 'self' data: http://localhost:8080 https://res.cloudinary.com https://img.freepik.com",
+      "connect-src 'self' http://localhost:8080",
+      "script-src 'self' 'unsafe-inline' https://accounts.google.com",
+    ].join('; ')
   );
   next();
 });
-// Static for public folder
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // API ROUTES
 app.use('/login', loginRouter);
