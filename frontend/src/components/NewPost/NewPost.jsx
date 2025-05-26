@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import PropTypes from "prop-types"
-import ReactQuill from "react-quill"
-import "react-quill/dist/quill.snow.css"
-import { toast } from "react-toastify"
-import { X, Upload, ImageIcon, Tag, Loader2 } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { toast } from "react-toastify";
+import { X, Upload, ImageIcon, Tag, Loader2 } from "lucide-react";
 
 const NewPost = ({ token }) => {
-  const [title, setTitle] = useState("")
-  const [category, setCategory] = useState("")
-  const [tags, setTags] = useState("")
-  const [content, setContent] = useState("")
-  const [imageCloudUrl, setImageCloudUrl] = useState("")
-  const [imagePreview, setImagePreview] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [errors, setErrors] = useState({})
-  const [isDragging, setIsDragging] = useState(false)
-  const [wordCount, setWordCount] = useState(0)
-  const navigate = useNavigate()
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [tags, setTags] = useState("");
+  const [content, setContent] = useState("");
+  const [imageCloudUrl, setImageCloudUrl] = useState("");
+  const [imagePreview, setImagePreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isDragging, setIsDragging] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
+  const navigate = useNavigate();
 
   const popularCategories = [
     "Technology",
@@ -30,74 +30,75 @@ const NewPost = ({ token }) => {
     "Education",
     "Business",
     "Entertainment",
-  ]
+  ];
 
   useEffect(() => {
     if (content) {
-      const text = content.replace(/<[^>]*>/g, "")
-      const words = text.split(/\s+/).filter((word) => word.length > 0)
-      setWordCount(words.length)
+      const text = content.replace(/<[^>]*>/g, "");
+      const words = text.split(/\s+/).filter((word) => word.length > 0);
+      setWordCount(words.length);
     } else {
-      setWordCount(0)
+      setWordCount(0);
     }
-  }, [content])
+  }, [content]);
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
-    if (!title.trim()) newErrors.title = "Title is required"
-    if (!category.trim()) newErrors.category = "Category is required"
-    if (!content.trim() || content === "<p><br></p>") newErrors.content = "Content is required"
-    if (!imageCloudUrl) newErrors.image = "Featured image is required"
+    if (!title.trim()) newErrors.title = "Title is required";
+    if (!category.trim()) newErrors.category = "Category is required";
+    if (!content.trim() || content === "<p><br></p>")
+      newErrors.content = "Content is required";
+    if (!imageCloudUrl) newErrors.image = "Featured image is required";
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleImageChange = async (e) => {
-    const imageFile = e.target.files[0]
-    await processImageUpload(imageFile)
-  }
+    const imageFile = e.target.files[0];
+    await processImageUpload(imageFile);
+  };
 
   const handleDragOver = (e) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const handleDrop = async (e) => {
-    e.preventDefault()
-    setIsDragging(false)
+    e.preventDefault();
+    setIsDragging(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const imageFile = e.dataTransfer.files[0]
-      await processImageUpload(imageFile)
+      const imageFile = e.dataTransfer.files[0];
+      await processImageUpload(imageFile);
     }
-  }
+  };
 
   const processImageUpload = async (imageFile) => {
     if (!imageFile) {
-      toast.error("Please select an image file")
-      return
+      toast.error("Please select an image file");
+      return;
     }
     if (!imageFile.type.match("image.*")) {
-      toast.error("Please select an image file")
-      return
+      toast.error("Please select an image file");
+      return;
     }
     if (imageFile.size > 5 * 1024 * 1024) {
-      toast.error("Image size should be less than 5MB")
-      return
+      toast.error("Image size should be less than 5MB");
+      return;
     }
 
-    setLoading(true)
-    setImagePreview(URL.createObjectURL(imageFile))
-    setErrors({ ...errors, image: null })
+    setLoading(true);
+    setImagePreview(URL.createObjectURL(imageFile));
+    setErrors({ ...errors, image: null });
 
-    const formData = new FormData()
-    formData.append("image", imageFile)
+    const formData = new FormData();
+    formData.append("image", imageFile);
 
     try {
       const response = await fetch("http://localhost:8080/cloudinary/upload", {
@@ -105,46 +106,46 @@ const NewPost = ({ token }) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        credentials: 'include',
+        credentials: "include",
         body: formData,
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(`Error: ${errorData.message}`)
-        setLoading(false)
-        return
+        const errorData = await response.json();
+        toast.error(`Error: ${errorData.message}`);
+        setLoading(false);
+        return;
       }
 
-      const imageUrl = await response.text()
-      setImageCloudUrl(imageUrl)
-      toast.success("Image uploaded successfully!")
+      const result = await response.json();
+      setImageCloudUrl(result.url || result.secure_url);
+      toast.success("Image uploaded successfully!");
     } catch (error) {
-      console.error("Error uploading image:", error)
-      toast.error("Failed to upload image. Please try again.")
+      console.error("Error uploading image:", error);
+      toast.error("Failed to upload image. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const removeImage = () => {
-    setImagePreview(null)
-    setImageCloudUrl("")
-  }
+    setImagePreview(null);
+    setImageCloudUrl("");
+  };
 
   const handlePost = async () => {
     if (!token) {
-      toast.error("You need to log in to create a post.")
-      navigate("/login")
-      return
+      toast.error("You need to log in to create a post.");
+      navigate("/login");
+      return;
     }
 
     if (!validateForm()) {
-      toast.error("Please fill in all required fields")
-      return
+      toast.error("Please fill in all required fields");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     const newPost = {
       title,
@@ -155,7 +156,7 @@ const NewPost = ({ token }) => {
         .filter((tag) => tag),
       content,
       imageCloudUrl,
-    }
+    };
 
     try {
       const response = await fetch("/api/posts", {
@@ -165,39 +166,40 @@ const NewPost = ({ token }) => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(newPost),
-      })
+      });
 
-      console.log("Post creation response status:", response.status)
-      const responseBody = await response.text()
-      console.log("Post creation response body:", responseBody)
+      console.log("Post creation response status:", response.status);
+      const responseData = await response.json(); 
 
       if (response.ok) {
-        toast.success("Post created successfully!")
-        navigate(`/`)
+        toast.success("Post created successfully!");
+        navigate(`/`);
       } else {
-        let errorMessage = responseBody
-          const errorData = JSON.parse(responseBody)
-          errorMessage = errorData.message || errorMessage
+        let errorMessage = responseData;
+        const errorData = JSON.parse(responseData);
+        errorMessage = errorData.message || errorMessage;
 
-        toast.error(`Error: ${errorMessage}`)
+        toast.error(`Error: ${errorMessage}`);
       }
     } catch (error) {
-      console.error("Error creating post:", error)
-      toast.error("An error occurred while creating the post. Please try again.")
+      console.error("Error creating post:", error);
+      toast.error(
+        "An error occurred while creating the post. Please try again."
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCancel = () => {
     if (title || category || tags || content || imagePreview) {
       if (window.confirm("Are you sure you want to discard your draft?")) {
-        navigate("/")
+        navigate("/");
       }
     } else {
-      navigate("/")
+      navigate("/");
     }
-  }
+  };
 
   const modules = {
     toolbar: [
@@ -209,18 +211,23 @@ const NewPost = ({ token }) => {
       ["link", "image"],
       ["clean"],
     ],
-  }
+  };
 
   return (
     <div className="w-full max-w-5xl mx-auto my-10 p-6 bg-white rounded-xl shadow-lg">
       <div className="mb-8 border-b pb-4">
         <h1 className="text-3xl font-bold text-gray-800">Create New Post</h1>
-        <p className="text-gray-600 mt-2">Share your thoughts and ideas with the community</p>
+        <p className="text-gray-600 mt-2">
+          Share your thoughts and ideas with the community
+        </p>
       </div>
 
       <div className="space-y-6">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="title"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Title <span className="text-red-500">*</span>
           </label>
           <input
@@ -232,15 +239,20 @@ const NewPost = ({ token }) => {
             placeholder="Enter a compelling title for your post"
             value={title}
             onChange={(e) => {
-              setTitle(e.target.value)
-              if (e.target.value.trim()) setErrors({ ...errors, title: null })
+              setTitle(e.target.value);
+              if (e.target.value.trim()) setErrors({ ...errors, title: null });
             }}
           />
-          {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
+          {errors.title && (
+            <p className="mt-1 text-sm text-red-500">{errors.title}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="category"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Category <span className="text-red-500">*</span>
           </label>
           <input
@@ -252,8 +264,9 @@ const NewPost = ({ token }) => {
             placeholder="e.g., Technology, Travel, Food"
             value={category}
             onChange={(e) => {
-              setCategory(e.target.value)
-              if (e.target.value.trim()) setErrors({ ...errors, category: null })
+              setCategory(e.target.value);
+              if (e.target.value.trim())
+                setErrors({ ...errors, category: null });
             }}
             list="category-suggestions"
           />
@@ -262,7 +275,9 @@ const NewPost = ({ token }) => {
               <option key={cat} value={cat} />
             ))}
           </datalist>
-          {errors.category && <p className="mt-1 text-sm text-red-500">{errors.category}</p>}
+          {errors.category && (
+            <p className="mt-1 text-sm text-red-500">{errors.category}</p>
+          )}
 
           <div className="mt-2 flex flex-wrap gap-2">
             {popularCategories.slice(0, 5).map((cat) => (
@@ -271,8 +286,8 @@ const NewPost = ({ token }) => {
                 type="button"
                 className="inline-flex items-center px-3 py-1 bg-gray-100 text-sm text-gray-800 rounded-full hover:bg-gray-200 transition-colors"
                 onClick={() => {
-                  setCategory(cat)
-                  setErrors({ ...errors, category: null })
+                  setCategory(cat);
+                  setErrors({ ...errors, category: null });
                 }}
               >
                 {cat}
@@ -282,8 +297,14 @@ const NewPost = ({ token }) => {
         </div>
 
         <div>
-          <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-            <Tag className="w-4 h-4 mr-1" /> Tags <span className="text-gray-500 text-xs ml-1">(comma separated)</span>
+          <label
+            htmlFor="tags"
+            className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+          >
+            <Tag className="w-4 h-4 mr-1" /> Tags{" "}
+            <span className="text-gray-500 text-xs ml-1">
+              (comma separated)
+            </span>
           </label>
           <input
             id="tags"
@@ -293,28 +314,40 @@ const NewPost = ({ token }) => {
             value={tags}
             onChange={(e) => setTags(e.target.value)}
           />
-          <p className="mt-1 text-xs text-gray-500">Add relevant tags to help readers discover your post</p>
+          <p className="mt-1 text-xs text-gray-500">
+            Add relevant tags to help readers discover your post
+          </p>
         </div>
 
         {/* Content Editor */}
         <div>
-          <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="content"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Content <span className="text-red-500">*</span>
           </label>
-          <div className={`border ${errors.content ? "border-red-500" : "border-gray-300"} rounded-lg overflow-hidden`}>
+          <div
+            className={`border ${
+              errors.content ? "border-red-500" : "border-gray-300"
+            } rounded-lg overflow-hidden`}
+          >
             <ReactQuill
               id="content"
               value={content}
               onChange={(value) => {
-                setContent(value)
-                if (value.trim() && value !== "<p><br></p>") setErrors({ ...errors, content: null })
+                setContent(value);
+                if (value.trim() && value !== "<p><br></p>")
+                  setErrors({ ...errors, content: null });
               }}
               modules={modules}
               placeholder="Write your post content here..."
               className="bg-white text-gray-900 h-64"
             />
           </div>
-          {errors.content && <p className="mt-1 text-sm text-red-500">{errors.content}</p>}
+          {errors.content && (
+            <p className="mt-1 text-sm text-red-500">{errors.content}</p>
+          )}
           <div className="mt-2 text-sm text-gray-500 flex justify-between">
             <span>Word count: {wordCount}</span>
             <span>Recommended: 300-1000 words for better engagement</span>
@@ -328,7 +361,11 @@ const NewPost = ({ token }) => {
 
           {imagePreview ? (
             <div className="relative mt-2 rounded-lg overflow-hidden border border-gray-300">
-              <img src={imagePreview || "/placeholder.svg"} alt="Preview" className="w-full h-64 object-cover" />
+              <img
+                src={imagePreview || "/placeholder.svg"}
+                alt="Preview"
+                className="w-full h-64 object-cover"
+              />
               <button
                 type="button"
                 onClick={removeImage}
@@ -346,14 +383,24 @@ const NewPost = ({ token }) => {
           ) : (
             <div
               className={`border-2 border-dashed ${
-                errors.image ? "border-red-400 bg-red-50" : "border-gray-300 bg-gray-50"
-              } ${isDragging ? "border-blue-500 bg-blue-50" : ""} rounded-lg p-8 text-center cursor-pointer transition-all`}
+                errors.image
+                  ? "border-red-400 bg-red-50"
+                  : "border-gray-300 bg-gray-50"
+              } ${
+                isDragging ? "border-blue-500 bg-blue-50" : ""
+              } rounded-lg p-8 text-center cursor-pointer transition-all`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => document.getElementById("fileInput").click()}
             >
-              <input type="file" id="fileInput" className="hidden" onChange={handleImageChange} accept="image/*" />
+              <input
+                type="file"
+                id="fileInput"
+                className="hidden"
+                onChange={handleImageChange}
+                accept="image/*"
+              />
               <div className="flex flex-col items-center justify-center space-y-2">
                 {loading ? (
                   <>
@@ -363,14 +410,20 @@ const NewPost = ({ token }) => {
                 ) : (
                   <>
                     <ImageIcon className="w-12 h-12 text-gray-400" />
-                    <div className="text-gray-700 font-medium">Drag and drop an image here, or click to select</div>
-                    <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                    <div className="text-gray-700 font-medium">
+                      Drag and drop an image here, or click to select
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      PNG, JPG, GIF up to 5MB
+                    </p>
                   </>
                 )}
               </div>
             </div>
           )}
-          {errors.image && <p className="mt-1 text-sm text-red-500">{errors.image}</p>}
+          {errors.image && (
+            <p className="mt-1 text-sm text-red-500">{errors.image}</p>
+          )}
         </div>
 
         <div className="flex justify-end space-x-4 pt-6 border-t">
@@ -402,11 +455,11 @@ const NewPost = ({ token }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 NewPost.propTypes = {
   token: PropTypes.string,
-}
+};
 
-export default NewPost
+export default NewPost;
