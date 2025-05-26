@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
-import ReactQuill from "react-quill";
+import dynamic from 'next/dynamic';
 import "react-quill/dist/quill.snow.css";
 import { toast } from "react-toastify";
 import { X, Upload, ImageIcon, Tag, Loader2 } from "lucide-react";
+
+// Dynamic import để tránh warning DOMNodeInserted
+const ReactQuill = dynamic(() => import('react-quill'), { 
+  ssr: false,
+  loading: () => <p>Loading editor...</p>
+});
 
 const NewPost = ({ token }) => {
   const [title, setTitle] = useState("");
@@ -31,6 +37,14 @@ const NewPost = ({ token }) => {
     "Business",
     "Entertainment",
   ];
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   useEffect(() => {
     if (content) {
@@ -85,7 +99,7 @@ const NewPost = ({ token }) => {
       return;
     }
     if (!imageFile.type.match("image.*")) {
-      toast.error("Please select an image file");
+      toast.error("Please select an image file (JPEG/PNG)");
       return;
     }
     if (imageFile.size > 5 * 1024 * 1024) {
@@ -93,15 +107,22 @@ const NewPost = ({ token }) => {
       return;
     }
 
+    if (!token) {
+      toast.error("You need to login to upload images");
+      navigate("/login");
+      return;
+    }
+
     setLoading(true);
-    setImagePreview(URL.createObjectURL(imageFile));
-    setErrors({ ...errors, image: null });
+    const previewUrl = URL.createObjectURL(imageFile);
+    setImagePreview(previewUrl);
+    setErrors(prev => ({...prev, image: null}));
 
     const formData = new FormData();
     formData.append("image", imageFile);
 
     try {
-      const response = await fetch("/cloudinary/upload", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/cloudinary/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -110,28 +131,55 @@ const NewPost = ({ token }) => {
         body: formData,
       });
 
+      // Kiểm tra response
       if (!response.ok) {
-        const errorData = await response.json();
-        toast.error(`Error: ${errorData.message}`);
-        setLoading(false);
-        return;
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { message: errorText || 'Upload failed' };
+        }
+        throw new Error(errorData.message || 'Upload failed');
       }
 
-      const result = await response.json();
-      setImageCloudUrl(result.url || result.secure_url);
+      // Xử lý response
+      const contentType = response.headers.get('content-type');
+      let result;
+      
+      if (contentType?.includes('application/json')) {
+        result = await response.json();
+      } else {
+        const text = await response.text();
+        try {
+          result = JSON.parse(text);
+        } catch {
+          result = { url: text.trim() };
+        }
+      }
+
+      // Validate URL
+      const imageUrl = result.url || result.secure_url;
+      if (!imageUrl || !imageUrl.startsWith('http')) {
+        throw new Error('Invalid image URL received from server');
+      }
+
+      setImageCloudUrl(imageUrl);
       toast.success("Image uploaded successfully!");
     } catch (error) {
-      console.error("Error uploading image:", error);
-      toast.error("Failed to upload image. Please try again.");
+      console.error("Upload error:", error);
+      toast.error(`Upload failed: ${error.message}`);
+      setImagePreview(null);
+      setImageCloudUrl("");
     } finally {
       setLoading(false);
     }
   };
 
-  const removeImage = () => {
+  const removeImage = useCallback(() => {
     setImagePreview(null);
     setImageCloudUrl("");
-  };
+  }, []);
 
   const handlePost = async () => {
     if (!token) {
@@ -159,7 +207,7 @@ const NewPost = ({ token }) => {
     };
 
     try {
-      const response = await fetch("/api/posts", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -168,24 +216,17 @@ const NewPost = ({ token }) => {
         body: JSON.stringify(newPost),
       });
 
-      console.log("Post creation response status:", response.status);
-      const responseData = await response.json(); 
+      const responseData = await response.json();
 
-      if (response.ok) {
-        toast.success("Post created successfully!");
-        navigate(`/`);
-      } else {
-        let errorMessage = responseData;
-        const errorData = JSON.parse(responseData);
-        errorMessage = errorData.message || errorMessage;
-
-        toast.error(`Error: ${errorMessage}`);
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Failed to create post');
       }
+
+      toast.success("Post created successfully!");
+      navigate(`/`);
     } catch (error) {
       console.error("Error creating post:", error);
-      toast.error(
-        "An error occurred while creating the post. Please try again."
-      );
+      toast.error(error.message || "An error occurred while creating the post. Please try again.");
     } finally {
       setLoading(false);
     }
