@@ -88,7 +88,8 @@ const NewPost = ({ token }) => {
       await processImageUpload(imageFile);
     }
   };
-
+ 
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
   const processImageUpload = async (imageFile) => {
     if (!imageFile) {
       toast.error("Please select an image file");
@@ -118,7 +119,7 @@ const NewPost = ({ token }) => {
     formData.append("image", imageFile);
 
     try {
-      const response = await fetch(`${import.meta.env.BASE_URL || 'http://localhost:8080'}/cloudinary/upload`, {
+       const response = await fetch(`${API_BASE_URL}/cloudinary/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -203,7 +204,7 @@ const NewPost = ({ token }) => {
     };
 
     try {
-      const response = await fetch(`${import.meta.env.BASE_URL || 'http://localhost:8080'}/api/posts`, {
+      const response = await fetch(`/api/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
