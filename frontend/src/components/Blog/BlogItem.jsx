@@ -30,9 +30,6 @@ const BlogItem = ({ blog, setBlogs }) => {
             className="w-full h-full object-cover rounded-l-lg"
             src={'blog.imageCloudUrl?f_auto,q_auto'}
             alt="Blog cover"
-            onError={(e) => {
-              console.error("Lỗi tải ảnh:", e.target.src); 
-            }}
           />
         </div>
 

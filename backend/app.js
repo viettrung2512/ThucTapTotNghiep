@@ -53,7 +53,7 @@ app.use((req, res, next) => {
       "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com",
       "frame-src 'self' https://accounts.google.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: https://*.googleusercontent.com"
+      "img-src 'self' data: http://localhost:8080 https://res.cloudinary.com https://img.freepik.com"
     ].join('; ')
   );
   next();
@@ -67,6 +67,8 @@ app.use('/api/auth/google', googleRouter);
 app.use('/verify', verifyRouter);
 app.use('/api/users', userRouter);
 app.use('/cloudinary', uploadRouter);
+// Serve static files từ thư mục 'public'
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use('/api/posts', postRouter);
 app.use('/api/comments', commentRouter);
 app.use('/api/notifications', notificationRouter);

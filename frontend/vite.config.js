@@ -6,17 +6,20 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      // Proxy cho API endpoints
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '') 
+        rewrite: (path) => path.replace(/^\/api/, '') // Xoá prefix /api
       },
+      // Proxy cho static files (hình ảnh upload)
       '/uploads': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
       },
+      // Proxy cho Cloudinary (nếu dùng)
       '/cloudinary': {
         target: 'https://res.cloudinary.com',
         changeOrigin: true,
@@ -26,6 +29,7 @@ export default defineConfig({
     }
   },
   build: {
+    // Thêm cấu hình assets để fix đường dẫn hình ảnh production
     assetsInlineLimit: 0,
     rollupOptions: {
       output: {
