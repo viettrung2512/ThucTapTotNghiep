@@ -30,7 +30,8 @@ const app = express();
 app.use(cors({
   origin: [
     'https://social-web-axbp.onrender.com',
-    'https://accounts.google.com'
+    'https://accounts.google.com',
+    'http://localhost:3000'
   ],
   credentials: true
 }));

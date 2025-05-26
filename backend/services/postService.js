@@ -105,7 +105,7 @@ module.exports = {
             id: post.author._id ? post.author._id.toString() : undefined,
             name: post.author.name,
             username: post.author.username,
-            profilePicture: post.author.profilePicture,
+            profilePicture: post.author.profilePicture, 
           }
         : null;
 
@@ -128,17 +128,22 @@ module.exports = {
     return results;
   },
 
-  async getPostById(id) {
-    const post = await Post.findById(id);
-    // console.log(post);
-    const userId = post.author?._doc?._id || post?.author || post.author?._id;
-    // console.log(userId);
+async getPostById(id) {
+  const post = await Post.findById(id);
+  if (!post) throw new Error("Post not found"); // Kiểm tra ngay từ đầu
 
+  // Cách lấy userId an toàn hơn
+  const userId = post.author instanceof mongoose.Types.ObjectId 
+    ? post.author 
+    : post.author?._id || post.author?._doc?._id;
+
+  if (userId) {
     const user = await User.findById(userId);
     post.author = user;
-    if (!post) throw new Error("Post not found");
-    return post;
-  },
+  }
+  
+  return post;
+},
 
   async createPost(postRequest, req) {
     const userId = req.user.userId;
