@@ -18,6 +18,8 @@ const Blogs = () => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
+        const data = await response.json(); 
+        setBlogs(data);
       } catch (error) {
         console.error("Error fetching blogs:", error);
       } finally {
@@ -26,7 +28,6 @@ const Blogs = () => {
     };
 
     fetchBlogs();
-    // eslint-disable-next-line
   }, [token]);
 
   if (loading) {

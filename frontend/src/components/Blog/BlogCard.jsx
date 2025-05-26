@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const BlogCard = ({ blog, category, title, imageUrl }) => {
+const BlogCard = ({ blog, category, title, imageCloudUrl }) => {
   const navigate = useNavigate();
 
   const handleNavigation = () => {
@@ -33,7 +33,7 @@ const BlogCard = ({ blog, category, title, imageUrl }) => {
       {/* Ảnh bài viết */}
       <div className="relative">
         <img 
-          src={imageUrl} 
+          src={imageCloudUrl} 
           alt={title} 
           className="w-full h-44 object-cover"
           onError={(e) => {
@@ -77,7 +77,7 @@ BlogCard.propTypes = {
   }).isRequired,
   category: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
-  imageUrl: PropTypes.string.isRequired,
+  imageCloudUrl: PropTypes.string.isRequired,
 };
 
 export default BlogCard;
