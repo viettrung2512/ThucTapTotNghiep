@@ -20,6 +20,7 @@ const RelatedBlogs = ({ tag, postId }) => {
             },
           }
         );
+
         if (response.ok) {
           const data = await response.json();
           const postsWithId = data.content.map(post => ({
@@ -46,7 +47,7 @@ const RelatedBlogs = ({ tag, postId }) => {
             blog={blog}
             category={blog.category}
             title={blog.title}
-            imageUrl={blog.imageUrl}
+            imageUrl={blog.imageCloudUrl}
           />
         ))}
       </div>
