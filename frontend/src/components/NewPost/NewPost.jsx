@@ -105,6 +105,7 @@ const NewPost = ({ token }) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        credentials: 'include',
         body: formData,
       })
 
