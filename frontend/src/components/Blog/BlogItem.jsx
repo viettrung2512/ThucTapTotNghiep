@@ -28,7 +28,7 @@ const BlogItem = ({ blog, setBlogs }) => {
         <div className="flex-shrink-0 w-1/4 h-36">
           <img
             className="w-full h-full object-cover rounded-l-lg"
-            src={'blog.imageCloudUrl'}
+            src={'blog.imageUrl'}
             alt="Blog cover"
           />
         </div>
@@ -105,7 +105,7 @@ BlogItem.propTypes = {
     content: PropTypes.string,
     createdAt: PropTypes.string,
     category: PropTypes.string,
-    imageCloudUrl: PropTypes.string,
+    imageUrl: PropTypes.string,
     likeCnt: PropTypes.number,
     liked: PropTypes.boolean,
     saved: PropTypes.boolean,

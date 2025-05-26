@@ -46,7 +46,7 @@ const RelatedBlogs = ({ tag, postId }) => {
             blog={blog}
             category={blog.category}
             title={blog.title}
-            imageUrl={blog.imageCloudUrl}
+            imageUrl={blog.imageUrl}
           />
         ))}
       </div>
