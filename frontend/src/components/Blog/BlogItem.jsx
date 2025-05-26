@@ -28,7 +28,7 @@ const BlogItem = ({ blog, setBlogs }) => {
         <div className="flex-shrink-0 w-1/4 h-36">
           <img
             className="w-full h-full object-cover rounded-l-lg"
-            src={'blog.imageCloudUrl?f_auto,q_auto'}
+            src={'blog.imageCloudUrl'}
             alt="Blog cover"
           />
         </div>
