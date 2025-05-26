@@ -29,7 +29,10 @@ const BlogItem = ({ blog, setBlogs }) => {
           <img
             className="w-full h-full object-cover rounded-l-lg"
             src={blog.imageCloudUrl}
-            alt="Blog cover"
+            onError={(e) => {
+              e.target.src =
+                import.meta.env.VITE_API_BASE_URL + "/default-blog-image.png";
+            }}
           />
         </div>
 

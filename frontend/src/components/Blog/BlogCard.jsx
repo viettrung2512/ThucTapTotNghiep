@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const BlogCard = ({ blog, category, title, imageCloudUrl }) => {
+const BlogCard = ({ blog, category, title }) => {
   const navigate = useNavigate();
 
   const handleNavigation = () => {
@@ -33,7 +33,7 @@ const BlogCard = ({ blog, category, title, imageCloudUrl }) => {
       {/* Ảnh bài viết */}
       <div className="relative">
         <img 
-          src={imageCloudUrl} 
+          src={blog.imageCloudUrl} 
           alt={title} 
           className="w-full h-44 object-cover"
           onError={(e) => {
@@ -72,12 +72,12 @@ BlogCard.propTypes = {
     _id: PropTypes.string.isRequired,
     author: PropTypes.shape({
       username: PropTypes.string,
-      profilePicture: PropTypes.string
-    })
+      profilePicture: PropTypes.string,
+    }),
+    imageCloudUrl: PropTypes.string.isRequired
   }).isRequired,
   category: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
-  imageCloudUrl: PropTypes.string.isRequired,
 };
 
 export default BlogCard;
