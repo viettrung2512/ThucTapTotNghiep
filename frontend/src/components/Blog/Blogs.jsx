@@ -18,15 +18,6 @@ const Blogs = () => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        const data = await response.json();
-        console.log("Blog data:", data);
-        data.forEach(blog => {
-          console.log(`Blog ID: ${blog._id}, imageCloudUrl: ${blog.imageCloudUrl}`);
-          if (!blog.imageCloudUrl) {
-            console.warn(`Thiếu imageCloudUrl cho blog ID: ${blog._id}`);
-          }
-        });
-        setBlogs(data);
       } catch (error) {
         console.error("Error fetching blogs:", error);
       } finally {
