@@ -20,7 +20,15 @@ const RelatedBlogs = ({ tag, postId }) => {
             },
           }
         );
-
+        const data = await response.json();
+        console.log("Blog data:", data);
+        data.forEach(blog => {
+          console.log(`Blog ID: ${blog._id}, imageCloudUrl: ${blog.imageCloudUrl}`);
+          if (!blog.imageCloudUrl) {
+            console.warn(`Thiếu imageCloudUrl cho blog ID: ${blog._id}`);
+          }
+        });
+        setBlogs(data);
         if (response.ok) {
           const data = await response.json();
           const postsWithId = data.content.map(post => ({

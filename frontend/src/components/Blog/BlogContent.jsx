@@ -38,6 +38,14 @@ const BlogContent = () => {
           navigate("/*");
           throw new Error("Failed to fetch blog data");
         }
+                const data = await response.json();
+        console.log("Blog data:", data);
+        data.forEach(blog => {
+          console.log(`Blog ID: ${blog._id}, imageCloudUrl: ${blog.imageCloudUrl}`);
+          if (!blog.imageCloudUrl) {
+            console.warn(`Thiếu imageCloudUrl cho blog ID: ${blog._id}`);
+          }
+        });
         let blogData = await response.json();
         blogData = {
           ...blogData,

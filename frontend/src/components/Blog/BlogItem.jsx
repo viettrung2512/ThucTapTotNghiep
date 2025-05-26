@@ -28,12 +28,11 @@ const BlogItem = ({ blog, setBlogs }) => {
         <div className="flex-shrink-0 w-1/4 h-36">
           <img
             className="w-full h-full object-cover rounded-l-lg"
-            src={blog.imageCloudUrl}
+            src={'blog.imageCloudUrl?f_auto,q_auto'}
             alt="Blog cover"
             onError={(e) => {
               console.error("Lỗi tải ảnh:", e.target.src); 
             }}
-            crossOrigin="anonymous"
           />
         </div>
 
