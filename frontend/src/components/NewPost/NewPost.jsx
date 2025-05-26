@@ -1,18 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
-import dynamic from 'next/dynamic';
 import "react-quill/dist/quill.snow.css";
 import { toast } from "react-toastify";
 import { X, Upload, ImageIcon, Tag, Loader2 } from "lucide-react";
 
-// Dynamic import để tránh warning DOMNodeInserted
-const ReactQuill = dynamic(() => import('react-quill'), { 
-  ssr: false,
-  loading: () => <p>Loading editor...</p>
-});
+// Sử dụng React.lazy thay vì next/dynamic
+const ReactQuill = lazy(() => import('react-quill'));
 
 const NewPost = ({ token }) => {
   const [title, setTitle] = useState("");
@@ -122,7 +118,7 @@ const NewPost = ({ token }) => {
     formData.append("image", imageFile);
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/cloudinary/upload`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/cloudinary/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -207,7 +203,7 @@ const NewPost = ({ token }) => {
     };
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/posts`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -373,18 +369,20 @@ const NewPost = ({ token }) => {
               errors.content ? "border-red-500" : "border-gray-300"
             } rounded-lg overflow-hidden`}
           >
-            <ReactQuill
-              id="content"
-              value={content}
-              onChange={(value) => {
-                setContent(value);
-                if (value.trim() && value !== "<p><br></p>")
-                  setErrors({ ...errors, content: null });
-              }}
-              modules={modules}
-              placeholder="Write your post content here..."
-              className="bg-white text-gray-900 h-64"
-            />
+            <Suspense fallback={<div className="p-4 text-center">Loading editor...</div>}>
+              <ReactQuill
+                id="content"
+                value={content}
+                onChange={(value) => {
+                  setContent(value);
+                  if (value.trim() && value !== "<p><br></p>")
+                    setErrors({ ...errors, content: null });
+                }}
+                modules={modules}
+                placeholder="Write your post content here..."
+                className="bg-white text-gray-900 h-64"
+              />
+            </Suspense>
           </div>
           {errors.content && (
             <p className="mt-1 text-sm text-red-500">{errors.content}</p>
@@ -477,7 +475,7 @@ const NewPost = ({ token }) => {
           </button>
           <button
             type="button"
-            className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-white transition-all flex items-center"
+            className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all flex items-center"
             onClick={handlePost}
             disabled={loading}
           >
