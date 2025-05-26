@@ -31,131 +31,102 @@ module.exports = {
   },
 
   async getAllPosts(page, size, sort = "createdAt,desc", userId = null) {
-  const [sortField, sortDir] = sort.split(",");
-  const sortOption = { [sortField]: sortDir === "desc" ? -1 : 1 };
+    const [sortField, sortDir] = sort.split(",");
+    const sortOption = { [sortField]: sortDir === "desc" ? -1 : 1 };
 
-  // 1. Thêm projection để đảm bảo trường imageCloudUrl luôn tồn tại
-  let query = Post.find({}, { imageCloudUrl: 1, title: 1, category: 1, content: 1, createdAt: 1, author: 1 })
-    .sort(sortOption)
-    .populate({
-      path: "author",
-      select: "name profilePicture username",
-      // 2. Thêm fallback cho profilePicture
-      transform: (doc) => ({
-        ...doc.toObject(),
-        profilePicture: doc.profilePicture || '/default-avatar.png'
-      })
-    })
-    .lean();
+    let query = Post.find({})
+      .sort(sortOption)
+      .populate("author", "name profilePicture username")
+      .lean();
 
-  // Phân trang
-  if (page !== undefined && size !== undefined) {
-    const skip = Math.max(0, parseInt(page) * parseInt(size));
-    const limit = parseInt(size);
-    if (!isNaN(skip) && !isNaN(limit)) {
-      query = query.skip(skip).limit(limit);
+    if (page !== undefined && size !== undefined) {
+      const skip = parseInt(page) * parseInt(size);
+      const limit = parseInt(size);
+      if (!isNaN(skip) && !isNaN(limit)) {
+        query = query.skip(skip).limit(limit);
+      } else {
+      }
     }
-  }
 
-  const posts = await query.exec();
-  
-  // 3. Thêm fallback cho imageCloudUrl
-  const processedPosts = posts.map(post => ({
-    ...post,
-    imageCloudUrl: post.imageCloudUrl || '/default-blog-image.png'
-  }));
+    const posts = await query.exec();
+    const postIds = posts.map((post) => post._id);
 
-  const postIds = processedPosts.map((post) => post._id);
-
-  if (postIds.length === 0) {
-    return [];
-  }
-
-  // 4. Sửa lỗi aggregation với postIds là ObjectId
-  const objectIds = postIds.map(id => new mongoose.Types.ObjectId(id));
-
-  const [likeCounts, saveCounts] = await Promise.all([
-    Like.aggregate([
-      { 
-        $match: { 
-          contentId: { $in: objectIds },
-          type: LIKE_TYPE.POST 
-        }
-      },
-      { $group: { _id: "$contentId", count: { $sum: 1 } } }
-    ]),
-    Bookmark.aggregate([
-      { 
-        $match: { 
-          postId: { $in: objectIds }
-        }
-      },
-      { $group: { _id: "$postId", count: { $sum: 1 } } }
-    ])
-  ]);
-
-  // 5. Convert _id sang string để match chính xác
-  const likeCountMap = likeCounts.reduce((acc, item) => {
-    acc[item._id.toString()] = item.count;
-    return acc;
-  }, {});
-
-  const saveCountMap = saveCounts.reduce((acc, item) => {
-    acc[item._id.toString()] = item.count;
-    return acc;
-  }, {});
-
-  // 6. Xử lý user interactions
-  let likedIds = new Set();
-  let savedIds = new Set();
-
-  if (userId) {
-    try {
-      const userIdObj = new mongoose.Types.ObjectId(userId);
-      const [userLikes, userSaves] = await Promise.all([
-        Like.find({
-          userId: userIdObj,
-          contentId: { $in: objectIds },
-          type: "POST",
-        }).lean(),
-        Bookmark.find({
-          userId: userIdObj,
-          postId: { $in: objectIds },
-        }).lean(),
-      ]);
-      
-      likedIds = new Set(userLikes.map(like => like.contentId.toString()));
-      savedIds = new Set(userSaves.map(save => save.postId.toString()));
-    } catch (error) {
-      console.error("Error fetching user interactions:", error);
+    if (postIds.length === 0) {
+      return [];
     }
-  }
 
-  // 7. Tạo kết quả cuối cùng với fallback values
-  return processedPosts.map((post) => {
-    const postIdString = post._id.toString();
-    
-    return {
-      id: postIdString,
-      _id: post._id,
-      title: post.title,
-      category: post.category,
-      content: post.content,
-      imageCloudUrl: post.imageCloudUrl, // Đã có fallback từ bước 3
-      createdAt: post.createdAt,
-      author: {
-        id: post.author?._id?.toString(),
-        name: post.author?.name || 'Unknown',
-        username: post.author?.username || 'anonymous',
-        profilePicture: post.author?.profilePicture // Đã có fallback từ populate
-      },
-      likeCnt: likeCountMap[postIdString] || 0,
-      saveCnt: saveCountMap[postIdString] || 0,
-      liked: likedIds.has(postIdString),
-      saved: savedIds.has(postIdString)
-    };
-  });
-},
+    const [likeCounts, saveCounts] = await Promise.all([
+      Like.aggregate([
+        { $match: { contentId: { $in: postIds }, type: LIKE_TYPE.POST } },
+        { $group: { _id: "$contentId", count: { $sum: 1 } } },
+      ]),
+      Bookmark.aggregate([
+        { $match: { postId: { $in: postIds } } },
+        { $group: { _id: "$postId", count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const likeCountMap = likeCounts.reduce((acc, item) => {
+      acc[item._id.toString()] = item.count;
+      return acc;
+    }, {});
+
+    const saveCountMap = saveCounts.reduce((acc, item) => {
+      acc[item._id.toString()] = item.count;
+      return acc;
+    }, {});
+
+    let likedIds = new Set();
+    let savedIds = new Set();
+
+    if (userId) {
+      try {
+        const userIdObj = new mongoose.Types.ObjectId(userId);
+        const [userLikes, userSaves] = await Promise.all([
+          Like.find({
+            userId: userIdObj,
+            contentId: { $in: postIds },
+            type: "POST",
+          }).lean(),
+          Bookmark.find({
+            userId: userIdObj,
+            postId: { $in: postIds },
+          }).lean(),
+        ]);
+        likedIds = new Set(userLikes.map((like) => like.contentId.toString()));
+        savedIds = new Set(userSaves.map((save) => save.postId.toString()));
+      } catch (error) {}
+    }
+
+    const results = posts.map((post) => {
+      const postIdString = post._id.toString();
+      const authorDetails = post.author
+        ? {
+            id: post.author._id ? post.author._id.toString() : undefined,
+            name: post.author.name,
+            username: post.author.username,
+            profilePicture: post.author.profilePicture, 
+          }
+        : null;
+
+      return {
+        id: postIdString,
+        _id: post._id,
+        title: post.title,
+        category: post.category,
+        content: post.content,
+        imageCloudUrl: post.imageCloudUrl,
+        createdAt: post.createdAt,
+        author: authorDetails,
+        likeCnt: likeCountMap[postIdString] || 0,
+        saveCnt: saveCountMap[postIdString] || 0,
+        liked: userId ? likedIds.has(postIdString) : false,
+        saved: userId ? savedIds.has(postIdString) : false,
+      };
+    });
+
+    return results;
+  },
 
 async getPostById(id) {
   const post = await Post.findById(id);
