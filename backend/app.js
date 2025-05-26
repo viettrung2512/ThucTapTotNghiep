@@ -33,6 +33,7 @@ app.use(cors({
     'https://accounts.google.com',
     'http://localhost:3000'
   ],
+  exposedHeaders: ['Content-Type']
 }));
 connectDB();
 app.use(helmet());

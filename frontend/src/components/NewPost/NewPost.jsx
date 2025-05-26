@@ -101,7 +101,7 @@ const NewPost = ({ token }) => {
     formData.append("image", imageFile);
 
     try {
-      const response = await fetch("https://social-web-axbp.onrender.com/cloudinary/upload", {
+      const response = await fetch("/cloudinary/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
