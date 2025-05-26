@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { X, Upload, ImageIcon, Tag, Loader2 } from "lucide-react";
 
 // Sử dụng React.lazy thay vì next/dynamic
-const ReactQuill = lazy(() => import('react-quill'));
+const ReactQuill = lazy(() => import("react-quill"));
 
 const NewPost = ({ token }) => {
   const [title, setTitle] = useState("");
@@ -88,7 +88,9 @@ const NewPost = ({ token }) => {
       await processImageUpload(imageFile);
     }
   };
- 
+
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
   const processImageUpload = async (imageFile) => {
     if (!imageFile) {
       toast.error("Please select an image file");
@@ -112,13 +114,14 @@ const NewPost = ({ token }) => {
     setLoading(true);
     const previewUrl = URL.createObjectURL(imageFile);
     setImagePreview(previewUrl);
-    setErrors(prev => ({...prev, image: null}));
+    setErrors((prev) => ({ ...prev, image: null }));
 
     const formData = new FormData();
     formData.append("image", imageFile);
 
     try {
-       const response = await fetch(`/cloudinary/upload`, {
+      const uploadUrl = API_BASE_URL.replace("/api", "") + "/cloudinary/upload";
+      const response = await fetch(uploadUrl, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -134,16 +137,16 @@ const NewPost = ({ token }) => {
         try {
           errorData = JSON.parse(errorText);
         } catch {
-          errorData = { message: errorText || 'Upload failed' };
+          errorData = { message: errorText || "Upload failed" };
         }
-        throw new Error(errorData.message || 'Upload failed');
+        throw new Error(errorData.message || "Upload failed");
       }
 
       // Xử lý response
-      const contentType = response.headers.get('content-type');
+      const contentType = response.headers.get("content-type");
       let result;
-      
-      if (contentType?.includes('application/json')) {
+
+      if (contentType?.includes("application/json")) {
         result = await response.json();
       } else {
         const text = await response.text();
@@ -156,8 +159,8 @@ const NewPost = ({ token }) => {
 
       // Validate URL
       const imageUrl = result.url || result.secure_url;
-      if (!imageUrl || !imageUrl.startsWith('http')) {
-        throw new Error('Invalid image URL received from server');
+      if (!imageUrl || !imageUrl.startsWith("http")) {
+        throw new Error("Invalid image URL received from server");
       }
 
       setImageCloudUrl(imageUrl);
@@ -215,14 +218,17 @@ const NewPost = ({ token }) => {
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to create post');
+        throw new Error(responseData.message || "Failed to create post");
       }
 
       toast.success("Post created successfully!");
       navigate(`/`);
     } catch (error) {
       console.error("Error creating post:", error);
-      toast.error(error.message || "An error occurred while creating the post. Please try again.");
+      toast.error(
+        error.message ||
+          "An error occurred while creating the post. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -369,7 +375,11 @@ const NewPost = ({ token }) => {
               errors.content ? "border-red-500" : "border-gray-300"
             } rounded-lg overflow-hidden`}
           >
-            <Suspense fallback={<div className="p-4 text-center">Loading editor...</div>}>
+            <Suspense
+              fallback={
+                <div className="p-4 text-center">Loading editor...</div>
+              }
+            >
               <ReactQuill
                 id="content"
                 value={content}
