@@ -36,15 +36,26 @@ const ProfilePage = () => {
   const [following, setFollowing] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
   const [modalLoading, setModalLoading] = useState(false);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     setLoading(true);
 
+    // Kiểm tra userId hợp lệ (24 ký tự hex)
+    const isValidObjectId = /^[a-f\d]{24}$/i.test(userId);
+    if (!isValidObjectId) {
+      console.error("userId không hợp lệ:", userId);
+      setLoading(false);
+      setUser(null);
+      setMyPosts([]);
+      return;
+    }
+
     const fetchUserInfo = async () => {
       try {
         const response = await fetch(
-          `/api/users/${userId}`,
+          `${API_BASE_URL}/api/users/${userId}`,
           {
             method: "GET",
             headers: {
@@ -69,7 +80,7 @@ const ProfilePage = () => {
     const fetchMyPosts = async () => {
       try {
         const response = await fetch(
-          `/api/posts/${userId}-posts`,
+          `${API_BASE_URL}/api/posts/${userId}-posts`,
           {
             method: "GET",
             headers: {
@@ -105,7 +116,7 @@ const ProfilePage = () => {
     setModalLoading(true);
     try {
       const response = await fetch(
-        `/api/follows/${userId}/followers`,
+        `${API_BASE_URL}/api/follows/${userId}/followers`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -132,7 +143,7 @@ const ProfilePage = () => {
     setModalLoading(true);
     try {
       const response = await fetch(
-        `/api/follows/${userId}/following`,
+        `${API_BASE_URL}/api/follows/${userId}/following`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -487,6 +498,12 @@ const ProfilePage = () => {
           items={following}
           loading={modalLoading}
         />
+      )}
+
+      {!loading && !user && (
+        <div className="text-center text-red-500 font-semibold my-8">
+          Không tìm thấy người dùng hoặc đường dẫn không hợp lệ.
+        </div>
       )}
     </div>
   );

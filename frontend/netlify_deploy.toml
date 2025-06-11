@@ -1,0 +1,11 @@
+[[redirects]]
+  from = "/api/*"
+  to = "http://localhost:8080/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/uploads/*"
+  to = "http://localhost:8080/uploads/:splat"
+  status = 200
+  force = true

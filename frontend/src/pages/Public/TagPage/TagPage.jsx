@@ -6,9 +6,16 @@ import { Link } from "react-router-dom";
 const TagPage = () => {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    fetch("/api/posts")
+    const token = localStorage.getItem("token");
+    fetch(`${API_BASE_URL}/api/posts`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((response) => response.json())
       .then((data) => {
         const categorySet = new Set();

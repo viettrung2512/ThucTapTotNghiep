@@ -3,10 +3,10 @@ const router = express.Router();
 const postController = require("../controllers/postController");
 const verifyToken = require("../middleware/verifyToken");
 // api/posts/
-router.get("/",postController.getAllPosts); //solved
+router.get("/",verifyToken, postController.getAllPosts); //solved
 router.get("/me", verifyToken, postController.getMyPosts);//solved
 router.get("/search", postController.searchPosts); //solved
-router.get("/most-liked",verifyToken ,postController.getPostsByMostLikes); //solved
+router.get("/most-liked", postController.getPostsByMostLikes);
 router.get("/:id-posts", postController.getUserPosts);//solved
 router.get("/:id", postController.getPostById);//solved
 router.get("/post-by-com-id/:id", postController.getPostByCommentId);
