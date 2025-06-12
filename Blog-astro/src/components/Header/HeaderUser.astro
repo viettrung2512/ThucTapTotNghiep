@@ -1,0 +1,139 @@
+---
+const user = Astro.locals.user ?? null; // Nếu dùng SSR, truyền user qua Astro.locals
+const userRole = Astro.locals.userRole ?? null;
+---
+<div class="user-section relative">
+  {user ? (
+    <>
+      <button id="new-post-btn" class="border-none bg-white text-black font-bold px-4 py-2 rounded-full ml-10">
+        New Post
+      </button>
+      <div class="flex items-center ml-10 cursor-pointer" id="user-dropdown-toggle">
+        {user.profilePicture && (
+          <img src={user.profilePicture} alt="Profile" class="w-8 h-8 rounded-lg mr-2" />
+        )}
+        <span>{user.username}</span>
+      </div>
+      <div id="user-dropdown" class="absolute right-0 mt-12 w-40 rounded-xl bg-white border border-gray-600 shadow-lg z-20 transform translate-x-6" style="display:none">
+        <button id="profile-btn" class="block px-4 py-2 text-left w-full rounded-xl bg-white text-black border-white hover:bg-white">Profile</button>
+        <button id="account-btn" class="block px-4 py-2 text-left w-full bg-white text-black border-white hover:bg-white">Account Detail</button>
+        {userRole === "ADMIN" && (
+          <button id="admin-btn" class="block px-4 py-2 text-left w-full rounded-xl bg-white text-indigo-600 border-white hover:bg-gray-100 font-semibold">Admin</button>
+        )}
+        <button id="logout-btn" class="block px-4 py-2 text-left w-full rounded-xl bg-white text-black border-white hover:bg-white">Logout</button>
+      </div>
+    </>
+  ) : (
+    <>
+      <button id="login-btn" class="border-none bg-transparent text-black mr-4">Login</button>
+      <button id="signup-btn" class="px-8 py-3 border-none text-black bg-gradient-to-r from-blue-300 to-white bg-[length:400%_400%] animate-pulse">Sign Up</button>
+    </>
+  )}
+</div>
+
+<script is:inline>
+  // Dropdown logic
+  const dropdownToggle = document.getElementById('user-dropdown-toggle');
+  const dropdown = document.getElementById('user-dropdown');
+  if (dropdownToggle && dropdown) {
+    dropdownToggle.addEventListener('click', () => {
+      dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    });
+    document.addEventListener('mousedown', (e) => {
+      if (!dropdown.contains(e.target) && e.target !== dropdownToggle) {
+        dropdown.style.display = 'none';
+      }
+    });
+  }
+  // Button logic
+  document.getElementById('login-btn')?.addEventListener('click', () => window.location.href = '/login');
+  document.getElementById('signup-btn')?.addEventListener('click', () => window.location.href = '/signup');
+  document.getElementById('logout-btn')?.addEventListener('click', () => {
+    localStorage.clear();
+    window.location.href = '/';
+  });
+  document.getElementById('profile-btn')?.addEventListener('click', () => window.location.href = `/profile/${user?.userId}`);
+  document.getElementById('account-btn')?.addEventListener('click', () => window.location.href = '/account');
+  document.getElementById('admin-btn')?.addEventListener('click', () => window.location.href = '/admin');
+  document.getElementById('new-post-btn')?.addEventListener('click', () => window.location.href = '/newpost');
+</script>
+
+<style>
+.user-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+#new-post-btn {
+  border: none;
+  background: white;
+  color: #000;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  margin-left: 2.5rem;
+  cursor: pointer;
+}
+#user-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  margin-left: 2.5rem;
+  cursor: pointer;
+}
+#user-dropdown-toggle img {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  margin-right: 0.5rem;
+}
+#user-dropdown {
+  position: absolute;
+  right: 0;
+  margin-top: 3rem;
+  width: 10rem;
+  border-radius: 0.75rem;
+  background: white;
+  border: 1px solid #4b5563;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+  z-index: 20;
+  transform: translateX(1.5rem);
+  display: none;
+}
+#user-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  background: white;
+  color: #000;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#user-dropdown button:hover {
+  background: #f3f4f6;
+}
+#admin-btn {
+  color: #6366f1;
+  font-weight: 600;
+}
+#login-btn, #signup-btn {
+  border: none;
+  background: transparent;
+  color: #000;
+  margin-right: 1rem;
+  cursor: pointer;
+}
+#signup-btn {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(to right, #93c5fd, #fff);
+  background-size: 400% 400%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+</style>

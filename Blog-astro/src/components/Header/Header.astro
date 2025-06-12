@@ -1,0 +1,135 @@
+---
+import HeaderLink from './HeaderLink.astro';
+import HeaderUser from './HeaderUser.astro';
+import { SITE_TITLE } from '../../consts';
+---
+
+<header class="header">
+  <nav class="nav-container">
+    <div class="logo-container">
+      <a href="/">
+        <img
+          src="/favicon.svg"
+          alt="favicon"
+          class="logo-img"
+        />
+      </a>
+    </div>
+    <div class="nav-links">
+      <ul class="nav-list">
+        <li><HeaderLink href="/">Home</HeaderLink></li>
+        <li><HeaderLink href="/about">About</HeaderLink></li>
+        <li><HeaderLink href="/support">Support</HeaderLink></li>
+        <li><HeaderLink href="/saved">Bookmarks</HeaderLink></li>
+      </ul>
+    </div>
+    <slot name="search" />
+    <div class="user-section">
+      <HeaderUser />
+    </div>
+  </nav>
+</header>
+
+<style>
+.header {
+  width: 100%;
+  height: 80px;
+  z-index: 10;
+  background: white;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+  position: fixed;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+}
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+.logo-img {
+  margin-left: 0.75rem;
+  opacity: 0.7;
+  width: 40px;
+  height: 40px;
+  transition: opacity 0.2s;
+}
+.logo-img:hover {
+  opacity: 1;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  color: #000;
+}
+.nav-list {
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none !important; 
+}
+.nav-list li {
+  margin: 0;
+  list-style: none !important; 
+}
+.nav-list a {
+  color: #222;
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background 0.2s, color 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+.nav-list a.active,
+.nav-list a:hover {
+  background: #e0e7ff;
+  color: #2563eb;
+  text-decoration: none;
+}
+.user-section {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-left: 2rem;
+}
+@media (max-width: 900px) {
+  .nav-container {
+    padding: 0 1rem;
+  }
+  .nav-list {
+    gap: 1rem;
+  }
+}
+@media (max-width: 600px) {
+  .nav-container {
+    flex-direction: column;
+    height: auto;
+    padding: 0.5rem;
+  }
+  .logo-container {
+    margin-bottom: 0.5rem;
+  }
+  .nav-list {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .user-section {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+}
+</style>

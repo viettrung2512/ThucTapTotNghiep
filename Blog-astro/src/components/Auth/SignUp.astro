@@ -1,0 +1,176 @@
+---
+import "../../styles/global.css";
+---
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-4px);
+    }
+    75% {
+      transform: translateX(4px);
+    }
+  }
+</style>
+
+<div>
+  <section class="p-8 w-full max-w-[500px] mx-auto">
+    <div
+      class="bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] p-12 border border-gray-200 animate-[fadeIn_0.6s_ease-out_forwards] max-w-[800px] w-full"
+    >
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-semibold text-gray-900 leading-tight">
+          Create Account
+        </h1>
+        <p class="text-gray-600 text-base mt-2">
+          Join us and start your journey
+        </p>
+      </div>
+      <form id="signup-form" class="space-y-4">
+        <div class="mb-6">
+          <label
+            for="signup-name"
+            class="block text-sm font-medium text-gray-900 mb-3"
+            >Full Name</label
+          >
+          <input
+            id="signup-name"
+            type="text"
+            class="w-full max-w-md px-4 py-3 text-base text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition duration-200 placeholder:text-gray-400"
+            required
+          />
+        </div>
+        <div class="mb-6">
+          <label
+            for="signup-email"
+            class="block text-sm font-medium text-gray-900 mb-2"
+            >Email Address</label
+          >
+          <input
+            id="signup-email"
+            type="email"
+            class="w-full px-4 py-3 text-base text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition duration-200 placeholder:text-gray-400"
+            required
+          />
+        </div>
+        <div class="mb-6">
+          <label
+            for="signup-username"
+            class="block text-sm font-medium text-gray-900 mb-2">Username</label
+          >
+          <input
+            id="signup-username"
+            type="text"
+            class="w-full px-4 py-3 text-base text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition duration-200 placeholder:text-gray-400"
+            required
+          />
+        </div>
+        <div class="mb-6">
+          <label
+            for="signup-password"
+            class="block text-sm font-medium text-gray-900 mb-2">Password</label
+          >
+          <input
+            id="signup-password"
+            type="password"
+            class="w-full px-4 py-3 text-base text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition duration-200 placeholder:text-gray-400"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          class="w-full py-3 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 hover:shadow-md hover:-translate-y-1 active:translate-y-0 transition duration-200 flex items-center justify-center"
+        >
+          Create Account
+        </button>
+        <div
+          id="signup-message"
+          class="mt-4 text-sm text-center transition-opacity duration-300"
+        >
+        </div>
+        <p class="text-center mt-6 text-sm text-gray-600">
+          Already have an account?
+          <a
+            href="/login"
+            class="text-blue-600 font-medium hover:text-blue-700 hover:underline transition duration-200 ml-1"
+            >Login</a
+          >
+        </p>
+      </form>
+    </div>
+  </section>
+</div>
+
+<script>
+  const API_BASE_URL =
+    import.meta.env.PUBLIC_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
+  const form = document.getElementById("signup-form");
+  const nameInput = document.getElementById("signup-name") as HTMLInputElement;
+  const emailInput = document.getElementById(
+    "signup-email"
+  ) as HTMLInputElement;
+  const usernameInput = document.getElementById(
+    "signup-username"
+  ) as HTMLInputElement;
+  const passwordInput = document.getElementById(
+    "signup-password"
+  ) as HTMLInputElement;
+  const messageEl = document.getElementById("signup-message");
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (messageEl) messageEl.textContent = "";
+      try {
+        const response = await fetch(`${API_BASE_URL}/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: nameInput.value,
+            email: emailInput.value,
+            username: usernameInput.value,
+            password: passwordInput.value,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Signup failed: ${response.status} - ${errorText}`);
+        }
+
+        if (messageEl) {
+          messageEl.textContent = "Signup successful! Please log in.";
+          messageEl.classList.remove("text-red-600");
+          messageEl.classList.add("text-green-600");
+        }
+        setTimeout(() => (window.location.href = "/login"), 1200);
+      } catch (err) {
+        if (messageEl) {
+          messageEl.textContent =
+            err instanceof Error ? err.message : "An unknown error occurred";
+          messageEl.classList.remove("text-green-600");
+          messageEl.classList.add("text-red-600");
+        }
+      }
+    });
+  }
+</script>

@@ -1,0 +1,184 @@
+---
+---
+<div class="relative">
+  <div class="searchBar">
+    <input
+      id="search-input"
+      type="text"
+      placeholder="Search..."
+      class="w-full p-3 text-black rounded-xl border border-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+      aria-label="Search posts"
+      autocomplete="off"
+    />
+  </div>
+  <div id="search-results" class="searchResultsContainer bg-white border border-gray-700" style="display:none"></div>
+</div>
+
+<script is:inline>
+  const input = document.getElementById('search-input');
+  const resultsDiv = document.getElementById('search-results');
+  let timeout;
+  let lastTerm = '';
+  let isLoading = false;
+
+  input.addEventListener('input', () => {
+    clearTimeout(timeout);
+    const term = input.value.trim();
+    if (!term) {
+      resultsDiv.style.display = 'none';
+      resultsDiv.innerHTML = '';
+      return;
+    }
+    timeout = setTimeout(async () => {
+      if (lastTerm === term) return;
+      lastTerm = term;
+      isLoading = true;
+      resultsDiv.innerHTML = '<p>Loading results...</p>';
+      resultsDiv.style.display = 'block';
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/posts/search?keyword=${encodeURIComponent(term)}`);
+        const data = await res.json();
+        isLoading = false;
+        if (!Array.isArray(data) || data.length === 0) {
+          resultsDiv.innerHTML = '<p>No results found.</p>';
+          return;
+        }
+        resultsDiv.innerHTML = `<ul class="space-y-4">
+          ${data.slice(0,5).map(result => `
+            <li class="p-4 rounded-md bg-white hover:bg-[#1A2027] cursor-pointer transition-transform transform hover:scale-105 flex items-center" data-id="${result.id}">
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-black">${result.title}</h3>
+                <p class="text-sm text-black"><strong>Category:</strong> ${result.category}</p>
+                <p class="text-sm text-black"><strong>Tags:</strong> ${Array.isArray(result.tags) ? result.tags.join(", ") : "No tags available"}</p>
+              </div>
+              ${result.imageCloudUrl ? `<img src="${result.imageCloudUrl}" alt="${result.title}" class="ml-4 h-16 w-16 object-cover rounded-md" />` : ''}
+            </li>
+          `).join('')}
+        </ul>`;
+        resultsDiv.querySelectorAll('li[data-id]').forEach(li => {
+          li.addEventListener('click', () => {
+            window.location.href = `/blog/${li.dataset.id}`;
+          });
+        });
+      } catch (e) {
+        isLoading = false;
+        resultsDiv.innerHTML = '<p>Error loading results.</p>';
+      }
+    }, 500);
+  });
+
+  document.addEventListener('mousedown', (event) => {
+    if (!resultsDiv.contains(event.target) && event.target !== input) {
+      resultsDiv.style.display = 'none';
+    }
+  });
+</script>
+
+<style>
+.searchBar {
+  width: 300px;
+  max-width: 100%;
+  margin: 0 1rem;
+  position: relative;
+}
+
+#search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #a1a1aa;
+  background: #f9fafb;
+  color: #222;
+  font-size: 1rem;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+#search-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #93c5fd;
+  background: #fff;
+}
+
+.searchResultsContainer {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  border: 1px solid #d1d5db;
+  z-index: 50;
+  padding: 0.5rem 0;
+  max-height: 350px;
+  overflow-y: auto;
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+.searchResultsContainer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.searchResultsContainer li {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  margin: 0.25rem 0;
+}
+
+.searchResultsContainer li:hover {
+  background: #f1f5f9;
+  transform: scale(1.02);
+}
+
+.searchResultsContainer img {
+  margin-left: 1rem;
+  height: 3.5rem;
+  width: 3.5rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.searchResultsContainer h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.25rem 0;
+}
+
+.searchResultsContainer p {
+  font-size: 0.95rem;
+  color: #334155;
+  margin: 0.1rem 0;
+}
+
+.searchResultsContainer strong {
+  color: #2563eb;
+}
+
+@media (max-width: 600px) {
+  .searchBar {
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+  .searchResultsContainer {
+    left: 0;
+    width: 100vw;
+    border-radius: 0;
+  }
+}
+</style>
